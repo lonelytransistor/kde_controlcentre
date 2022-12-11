@@ -6,23 +6,24 @@ import QtGraphicalEffects 1.0
 import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 
-Item {
+DropArea {
     id: compactRep
     
-    RowLayout {
+    onEntered: {
+        if (drag.hasUrls) {
+            plasmoid.expanded = true
+        }
+    }
+
+    PlasmaCore.IconItem {
         anchors.fill: parent
-        
-        PlasmaCore.IconItem {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            source: root.mainIconName
-            smooth: true
-            
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    plasmoid.expanded = !plasmoid.expanded
-                }
+        source: root.mainIconName
+        smooth: true
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                plasmoid.expanded = !plasmoid.expanded
             }
         }
     }

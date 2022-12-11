@@ -5,12 +5,13 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 
 Card {
     id: sliderComp
-    signal moved
 
     property alias title: title.text
     property alias secondaryTitle: secondaryTitle.text
+    property alias subTitle: subTitle.text
+    property alias subSecondaryTitle: subSecondaryTitle.text
     property alias source: icon.source
-    property alias value: slider.value
+    property alias value: progressBar.value
 
 
     property int from: 0
@@ -48,8 +49,34 @@ Card {
                 font.capitalization: Font.Capitalize
                 horizontalAlignment: Text.AlignRight
             }
+        }
+        RowLayout {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            spacing: root.smallSpacing
 
+            PlasmaComponents.Label {
+                id: subTitle
+                visible: text != ""
+                text: ""
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignLeft
+                font.pixelSize: root.mediumFontSize
+                font.capitalization: Font.Capitalize
+            }
 
+            PlasmaComponents.Label {
+                id: subSecondaryTitle
+                visible: text != ""
+                text: ""
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignRight
+                font.pixelSize: root.mediumFontSize
+                font.capitalization: Font.Capitalize
+                horizontalAlignment: Text.AlignRight
+            }
         }
         RowLayout {
             Layout.fillHeight: true
@@ -61,15 +88,12 @@ Card {
                 Layout.preferredHeight: root.largeFontSize*2
                 Layout.preferredWidth: Layout.preferredHeight
             }
-            PlasmaComponents.Slider {
-                id: slider
+            PlasmaComponents.ProgressBar {
+                id: progressBar
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 from: sliderComp.from
                 to: sliderComp.to
-                onMoved: {
-                    sliderComp.moved()
-                }
             }
         }
     }

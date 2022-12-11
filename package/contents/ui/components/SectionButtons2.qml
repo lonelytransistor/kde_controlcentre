@@ -8,6 +8,7 @@ import org.kde.kquickcontrolsaddons 2.0
 
 import "../lib" as Lib
 import "../js/funcs.js" as Funcs
+import org.kde.notificationmanager 1.0 as NotificationManager
 
 Lib.Card {
     id: sectionButtons
@@ -18,6 +19,11 @@ Lib.Card {
     property var network: network
     Network {
         id: network
+    }
+    // NOTIFICATION MANAGER
+    property var notificationSettings: notificationSettings
+    NotificationManager.Settings {
+        id: notificationSettings
     }
     
     // BLUETOOTH
@@ -50,11 +56,30 @@ Lib.Card {
         }
         
         Lib.LongButton {
-            title: i18n("Settings")
-            subtitle: i18n("System Settings")
-            source: "settings-configure"
+            function updateIcon() {
+                if (Funcs.checkInhibition()) {
+                    dndBtn.source = "notifications-disabled"
+                } else {
+                    dndBtn.source = "notifications"
+                }
+            }
+
+            id: dndBtn
+            title: i18n("DND")
+            subtitle: i18n("Do not disturb")
+            Component.onCompleted: updateIcon()
             onClicked: {
-                KCMShell.openSystemSettings("")
+                var d= new Date();
+                d.setYear(d.getFullYear()+1)
+
+                // Checking if do not disturb is already enabled
+                if (Funcs.checkInhibition()) {
+                    Funcs.revokeInhibitions()
+                } else {
+                    notificationSettings.notificationsInhibitedUntil = d
+                    notificationSettings.save()
+                }
+                updateIcon()
             }
         }
     }

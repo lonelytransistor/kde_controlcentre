@@ -6,10 +6,10 @@ import "../lib" as Lib
 
 Lib.Card {
     id: mediaPlayer
-    visible: root.showMediaPlayer
+    visible: root.showMediaPlayer && (audioTitle.text != i18n("No Media Playing"))
     Layout.fillWidth: true
     Layout.preferredHeight: root.sectionHeight/2
-    
+
     PlasmaCore.DataSource {
         id: musicSource
         engine: "mpris2"
@@ -26,7 +26,7 @@ Lib.Card {
                 var audioMetadata = audioData["Metadata"]
                 var title = audioMetadata["xesam:title"]
                 var artist = audioMetadata["xesam:artist"]
-                var thumb = audioMetadata["mpris:artUrl"]   
+                var thumb = audioMetadata["mpris:artUrl"]
                 
                 audioTitle.text = title ? title : i18n("Unknown Media")
                 audioThumb.source = thumb ? thumb : "../../assets/music.png"
@@ -81,6 +81,7 @@ Lib.Card {
             fillMode: Image.PreserveAspectCrop
             Layout.fillHeight: true
             Layout.preferredWidth: height
+            onStatusChanged: if (status == Image.Error) { source = "../../assets/music.png" }
         }
         ColumnLayout {
             id: mediaNameWrapper

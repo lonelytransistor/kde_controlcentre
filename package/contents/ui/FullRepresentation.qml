@@ -8,6 +8,8 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
+import org.kde.kdeconnect 1.0
+
 import "lib" as Lib
 import "components" as Components
 import "js/funcs.js" as Funcs 
@@ -47,35 +49,9 @@ Item {
             
             // Network, Bluetooth and Settings Button
             Components.SectionButtons{}
-            
-            // Quick Toggle Buttons
-            ColumnLayout {
-                spacing: 0
-                
-                Components.DndButton{}
-                RowLayout {
-                    spacing: 0
-                    
-                    // Two blocks for custom commands
-                    Components.CommandRun{
-                        visible: root.showCmd1
-                        title: root.cmdTitle1
-                        icon: root.cmdIcon1
-                        command: root.cmdRun1
-                    }
-                    Components.CommandRun{
-                        visible: root.showCmd2
-                        title: root.cmdTitle2
-                        icon: root.cmdIcon2
-                        command: root.cmdRun2
-                    }
-                    
-                    // Other blocks
-                    Components.KDEConnect{}
-                    Components.RedShift{}
-                    Components.ColorSchemeSwitcher{}
-                }
-            }
+
+            // Cast, Share and DND Button
+            Components.SectionButtons2{}
         }
         Item {
             Layout.fillHeight: true
@@ -86,9 +62,16 @@ Item {
             spacing: 0
             Layout.fillWidth: true
 
+            Repeater {
+                model: DevicesModel {
+                    displayFilter: DevicesModel.Paired | DevicesModel.Reachable
+                }
+                Components.KDEConnect {}
+            }
+            Components.MediaPlayer{}
             Components.Volume{}
             Components.BrightnessSlider{}
-            Components.MediaPlayer{}
+            Components.Battery{}
         }
         
 

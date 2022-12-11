@@ -4,12 +4,10 @@ import org.kde.plasma.networkmanagement 0.2 as PlasmaNM
 
 Item {
     property var appletProxyModel: appletProxyModel
+    property var networkModel: networkModel
     property var networkStatus: networkStatus.networkStatus
     property var activeConnectionIcon: activeConnectionIcon.connectionIcon
-    property var enabledConnections: enabledConnections
-    property var availableDevices: availableDevices
     property var handler: handler
-
     
     PlasmaNM.ConnectionIcon {
         id: activeConnectionIcon
@@ -20,16 +18,11 @@ Item {
     PlasmaNM.NetworkStatus {
         id: networkStatus
     }
+    PlasmaNM.NetworkModel {
+        id: networkModel
+    }
     PlasmaNM.AppletProxyModel {
         id: appletProxyModel
-        sourceModel: PlasmaNM.NetworkModel{}
+        sourceModel: networkModel
     }
-    PlasmaNM.EnabledConnections {
-        id: enabledConnections
-    }
-    PlasmaNM.AvailableDevices {
-        id: availableDevices
-    }
-
-
 }
