@@ -9,17 +9,13 @@ TouchArea {
     property var activeArea: null
     property var areas: []
     property var append: function(area) {
-        for (var ix = areas.length-1; ix < area.z; ix++) {
-            areas.push([]);
-        }
-        areas[area.z].push(area);
+        areas.push(area);
     }
     property var remove: function(area) {
-        for (var ix = 0; ix < areas.length; ix++) {
-            const ix2 = areas.indexOf(area)
-            if (ix2 > -1) {
-                areas[ix].splice(ix2, 1)
-            }
+        const ix = areas.indexOf(area)
+        if (ix > -1) {
+            areas.splice(ix, 1)
+            return;
         }
     }
 
@@ -39,15 +35,26 @@ TouchArea {
             "accepted": ev.accepted
         }
     }
+    function findActiveAreas(ev) {
+        var _areas = [];
+        for (const area of areas) {
+            let point = mapToItem(area, ev.x, ev.y)
+            if (point.x > 0 && point.y > 0 && point.x < area.width && point.y < area.height && area.enabled) {
+                for (var ix = _areas.length-1; ix < area.z; ix++) {
+                    _areas.push([]);
+                }
+                _areas[area.z].push(area);
+            }
+        }
+        return _areas;
+    }
     function findActiveArea(ev) {
         if (activeArea == null) {
-            for (var z = areas.length-1; z >= 0; z--) {
-                for (const area of areas[z]) {
-                    let point = mapToItem(area, ev.x, ev.y)
-                    if (point.x > 0 && point.y > 0 && point.x < area.width && point.y < area.height && area.enabled) {
-                        activeArea = area
-                        return activeArea
-                    }
+            var _areas = findActiveAreas(ev);
+            for (var ix = _areas.length-1; ix >= 0; ix--) {
+                if (_areas[ix].length > 0) {
+                    activeArea = _areas[ix][0];
+                    return _areas[ix][0];
                 }
             }
         } else {

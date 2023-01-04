@@ -9,6 +9,6 @@ TEMPLATE = lib
 
 SOURCES += TouchArea.cpp StatisticsProvider.cpp SystemConfig.cpp
 HEADERS += TouchArea.h StatisticsProvider.h SystemConfig.h
-HEADERS += QQuickEvent.h TouchArea_plugin.h
+HEADERS += QQuickEvent.h LonelyTransistor_plugin.h
 
 #RESOURCES += qml.qrc

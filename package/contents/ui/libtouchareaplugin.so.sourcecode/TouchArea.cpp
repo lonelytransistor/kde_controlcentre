@@ -1,4 +1,3 @@
-#include "TouchArea_plugin.h"
 #include "TouchArea.h"
 #include "QQuickEvent.h"
 

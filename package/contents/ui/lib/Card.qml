@@ -268,6 +268,16 @@ Item {
             TouchArea {
                 anchors.fill: buttonsO
             }
+            TouchArea {
+                anchors {
+                    top: touchArea.bottom
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+                enabled: cardRootOffset.state == "expanded"
+                z: 2
+            }
             ColumnLayout {
                 id: smallRepresentation
                 spacing: root.smallSpacing

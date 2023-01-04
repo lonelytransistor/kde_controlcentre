@@ -9,7 +9,6 @@ import "Components" as Components
 Item {
     id: fullRep
 
-    // PROPERTIES
     Layout.preferredWidth: root.fullRepWidth
     Layout.preferredHeight: componentContainer.implicitHeight
     Layout.minimumWidth: Layout.preferredWidth
@@ -18,11 +17,6 @@ Item {
     Layout.maximumHeight: Layout.preferredHeight
     clip: true
     
-    // Lists all available network connections
-    //Components.SectionNetworks{
-    //    id: sectionNetworks
-    //}
-
     ColumnLayout {
         id: componentContainer
         anchors.fill: parent
@@ -53,6 +47,10 @@ Item {
             }
         }
     }
+    GlobalTouchArea {
+        id: touchRoot
+        anchors.fill: parent
+    }
 
     property var objects: []
     readonly property var components: Item {
@@ -66,7 +64,6 @@ Item {
     onConfigChanged: instantiateComponents()
     function instantiateComponents() {
         let order = config.split(",").filter(n => n);
-
         while (objects.length > 0) {
             objects.pop().destroy();
         }
@@ -79,9 +76,5 @@ Item {
                 console.log("Unknown component uuid:", order[ix]);
             }
         }
-    }
-    GlobalTouchArea {
-        id: touchRoot
-        anchors.fill: parent
     }
 }

@@ -5,11 +5,11 @@
 #include "SystemConfig.h"
 #include "TouchArea.h"
 
-class QTouchAreaPlugin : public QQmlEngineExtensionPlugin {
+class QLonelyTransistorPlugin : public QQmlEngineExtensionPlugin {
   Q_OBJECT
   Q_PLUGIN_METADATA(IID QQmlEngineExtensionInterface_iid)
 public:
-  QTouchAreaPlugin() {
+  QLonelyTransistorPlugin() {
   }
   void initializeEngine(QQmlEngine *engine, const char *uri) {
     qmlRegisterType<TouchArea>("TouchArea", 1, 0, "TouchArea");
