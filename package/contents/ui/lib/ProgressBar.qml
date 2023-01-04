@@ -1,100 +1,104 @@
-import QtQuick 2.0
+import QtQuick 2.15
+import QtGraphicalEffects 1.15
 import QtQuick.Layouts 1.15
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
 
-Card {
-    id: sliderComp
+Item {
+    id: progressBarRoot
 
-    property alias title: title.text
-    property alias secondaryTitle: secondaryTitle.text
-    property alias subTitle: subTitle.text
-    property alias subSecondaryTitle: subSecondaryTitle.text
-    property alias source: icon.source
-    property alias value: progressBar.value
+    property alias icon: icon.source
+    property alias value: control.value
+    property alias from: control.from
+    property alias to: control.to
+    property int highlight: 0
 
+    signal iconPressed
 
-    property int from: 0
-    property int to: 100
+    height: icon.height
+    width: parent.width
+    Layout.fillHeight: true
+    Layout.fillWidth: true
 
-
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: root.largeSpacing
-        clip: true
-
-        RowLayout {
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            spacing: root.smallSpacing
-
-            PlasmaComponents.Label {
-                id: title
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft
-                font.pixelSize: root.largeFontSize
-                font.weight: Font.Bold
-                font.capitalization: Font.Capitalize
-            }
-
-            PlasmaComponents.Label {
-                id: secondaryTitle
-                visible: root.showPercentage
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignRight
-                font.pixelSize: root.largeFontSize
-                font.weight: Font.Bold
-                font.capitalization: Font.Capitalize
-                horizontalAlignment: Text.AlignRight
+    PlasmaCore.IconItem {
+        id: icon
+        height: root.largeFontSize*2
+        width: height
+        MouseArea {
+            anchors.fill: parent
+            onPressed: progressBarRoot.iconPressed();
+        }
+    }
+    PlasmaComponents.Slider {
+        id: control
+        anchors {
+            left: icon.source ? icon.right : parent.left
+            leftMargin: root.smallSpacing
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
+        from: 0
+        to: 100
+        property double highlight: (progressBarRoot.highlight - from)/(to - from)
+        Behavior on highlight {
+            NumberAnimation  {
+                duration: PlasmaCore.Units.shortDuration
+                easing.type: Easing.OutQuad
             }
         }
-        RowLayout {
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            spacing: root.smallSpacing
+        hoverEnabled: false
+        handle: Item {}
+        background: PlasmaCore.FrameSvgItem {
+            imagePath: "widgets/slider"
+            prefix: "groove"
+            colorGroup: PlasmaCore.ColorScope.colorGroup
 
-            PlasmaComponents.Label {
-                id: subTitle
-                visible: text != ""
-                text: ""
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft
-                font.pixelSize: root.mediumFontSize
-                font.capitalization: Font.Capitalize
+            implicitWidth: control.horizontal ? PlasmaCore.Units.gridUnit * 12 : fixedMargins.left + fixedMargins.right
+            implicitHeight: control.vertical ? PlasmaCore.Units.gridUnit * 12 : fixedMargins.top + fixedMargins.bottom
+
+            width: control.horizontal ? Math.max(fixedMargins.left + fixedMargins.right, control.availableWidth) : implicitWidth
+            height: control.vertical ? Math.max(fixedMargins.top + fixedMargins.bottom, control.availableHeight) : implicitHeight
+
+            x: control.leftPadding + (control.horizontal ? 0 : Math.round((control.availableWidth - width) / 2))
+            y: control.topPadding + (control.vertical ? 0 : Math.round((control.availableHeight - height) / 2))
+
+            PlasmaCore.FrameSvgItem {
+                imagePath: "widgets/slider"
+                prefix: "groove-highlight"
+                colorGroup: PlasmaCore.ColorScope.colorGroup
+
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                LayoutMirroring.enabled: control.mirrored
+
+                width: control.horizontal ? Math.max(fixedMargins.left + fixedMargins.right, Math.round(control.position * (control.availableWidth - control.handle.width / 2) + (control.handle.width / 2))) : parent.width
+                height: control.vertical ? Math.max(fixedMargins.top + fixedMargins.bottom, Math.round(control.position * (control.availableHeight - control.handle.height / 2) + (control.handle.height / 2))) : parent.height
             }
 
-            PlasmaComponents.Label {
-                id: subSecondaryTitle
-                visible: text != ""
-                text: ""
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignRight
-                font.pixelSize: root.mediumFontSize
-                font.capitalization: Font.Capitalize
-                horizontalAlignment: Text.AlignRight
+            PlasmaCore.FrameSvgItem {
+                id: highlightSvg
+
+                imagePath: "widgets/slider"
+                prefix: "groove-highlight"
+                status: PlasmaCore.FrameSvgItem.Selected
+                visible: control.highlight > 0
+                opacity: 0.3
+
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                LayoutMirroring.enabled: control.mirrored
+
+                width: control.horizontal ? Math.max(fixedMargins.left + fixedMargins.right, Math.round(control.highlight * control.availableWidth)) : parent.width
+                height: control.vertical ? Math.max(fixedMargins.top + fixedMargins.bottom, Math.round(control.highlight * control.availableHeight)) : parent.height
+            }
+            ColorOverlay {
+                anchors.fill: highlightSvg
+                source: highlightSvg
+                color: "#ffff0000"
+                opacity: 0.3
             }
         }
-        RowLayout {
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            spacing: root.smallSpacing
-
-            PlasmaCore.IconItem {
-                id: icon
-                Layout.preferredHeight: root.largeFontSize*2
-                Layout.preferredWidth: Layout.preferredHeight
-            }
-            PlasmaComponents.ProgressBar {
-                id: progressBar
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                from: sliderComp.from
-                to: sliderComp.to
-            }
-        }
+        focusPolicy: Qt.NoFocus
+        MouseArea { anchors.fill: parent }
     }
 }

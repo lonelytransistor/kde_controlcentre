@@ -1,0 +1,91 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "TouchArea"
+                }
+            ],
+            "className": "TouchArea",
+            "object": true,
+            "qualifiedClassName": "TouchArea",
+            "signals": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "ev",
+                            "type": "QQuickEvent*"
+                        }
+                    ],
+                    "name": "mousePress",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "ev",
+                            "type": "QQuickEvent*"
+                        }
+                    ],
+                    "name": "mouseMove",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "ev",
+                            "type": "QQuickEvent*"
+                        }
+                    ],
+                    "name": "mouseRelease",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "ev",
+                            "type": "QQuickEvent*"
+                        }
+                    ],
+                    "name": "touchPress",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "ev",
+                            "type": "QQuickEvent*"
+                        }
+                    ],
+                    "name": "touchMove",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "ev",
+                            "type": "QQuickEvent*"
+                        }
+                    ],
+                    "name": "touchRelease",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QQuickItem"
+                }
+            ]
+        }
+    ],
+    "inputFile": "TouchArea.h",
+    "outputRevision": 67
+}

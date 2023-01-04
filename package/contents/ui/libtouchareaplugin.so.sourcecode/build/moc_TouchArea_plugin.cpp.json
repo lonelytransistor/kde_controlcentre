@@ -1,0 +1,17 @@
+{
+    "classes": [
+        {
+            "className": "QTouchAreaPlugin",
+            "object": true,
+            "qualifiedClassName": "QTouchAreaPlugin",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QQmlEngineExtensionPlugin"
+                }
+            ]
+        }
+    ],
+    "inputFile": "TouchArea_plugin.h",
+    "outputRevision": 67
+}

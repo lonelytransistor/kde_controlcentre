@@ -52,7 +52,22 @@ Lib.Slider {
     readonly property bool isBrightnessAvailable: pmSource.data["PowerDevil"] && pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
     readonly property int maximumScreenBrightness: pmSource.data["PowerDevil"] ? pmSource.data["PowerDevil"]["Maximum Screen Brightness"] || 0 : 0
 
+    function updateBrightness(rootItem, source) {
+        if (rootItem.updateScreenBrightnessJob)
+            return;
 
+        if (!source.data["PowerDevil"]) {
+            return;
+        }
+
+        // we don't want passive brightness change send setBrightness call
+        rootItem.disableBrightnessUpdate = true;
+
+        if (typeof source.data["PowerDevil"]["Screen Brightness"] === 'number') {
+            rootItem.screenBrightness = source.data["PowerDevil"]["Screen Brightness"];
+        }
+        rootItem.disableBrightnessUpdate = false;
+    }
     onScreenBrightnessChanged: {
         if (disableBrightnessUpdate) {
             return;

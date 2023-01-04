@@ -1,7 +1,7 @@
-import QtQml 2.0
-import QtQuick 2.0
+import QtQml 2.15
+import QtQuick 2.15
 import QtQuick.Layouts 1.15
-import QtQuick.Controls 2.0
+import QtQuick.Controls 2.15
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
@@ -13,7 +13,7 @@ import "../js/funcs.js" as Funcs
 Lib.Card {
     id: kdeConnectDevice
     Layout.fillWidth: true
-    Layout.preferredHeight: 0.3*root.sectionHeight + 0.7*root.sectionHeight*notificationsModel.count/3 + root.largeSpacing
+    Layout.preferredHeight: 0.3*root.sectionHeight + 0.7*root.sectionHeight*notificationsView.model.count/3 + (notificationsView.model.count ? root.mediumSpacing : root.smallSpacing/2)
 
     readonly property QtObject device: DeviceDbusInterfaceFactory.create(model.deviceId)
 
@@ -21,6 +21,20 @@ Lib.Card {
     NotificationsModel {
         id: notificationsModel
         deviceId: model.deviceId
+    }
+
+    property var buttonIcon: ["document-open-folder", "irc-voice", "edit-clear-history"]
+    property var buttonTooltip: [i18n("Browse this device"), i18n("Ring the phone"), i18n("Dismiss all notifications")]
+    signal buttonPress(index: int)
+    onButtonPress: {
+        if (index == 0) {
+            sftp.startBrowsing()
+        } else if (index == 1) {
+            findMyPhone.ring()
+        } else if (index == 2) {
+            //visible: (notificationsView.model.count > 0 && notificationsView.model.isAnyDimissable)
+            notificationsView.model.dismissAll()
+        }
     }
 
     // Battery
@@ -144,119 +158,66 @@ Lib.Card {
     }
 
     ColumnLayout {
+        id: kdeConnectDeviceColumn
         anchors.fill: parent
         anchors.margins: root.largeSpacing
+        anchors.topMargin: root.largeSpacing*2.75
         Layout.fillWidth: true
         visible: !fileDropArea.dropping
-        clip: true
-
-        RowLayout {
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            spacing: 0
-
-            PlasmaComponents.Label {
-                id: deviceName
-                text: model.name
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft
-                font.pixelSize: root.largeFontSize
-                font.weight: Font.Bold
-                font.capitalization: Font.Capitalize
-            }
-
-            PlasmaComponents.ToolButton {
-                id: sftpButton
-                Layout.alignment: Qt.AlignHCenter
-                iconSource: "document-open-folder"
-                tooltip: i18n("Browse this device")
-                onClicked: sftp.startBrowsing()
-            }
-            PlasmaComponents.ToolButton {
-                id: findButton
-                Layout.alignment: Qt.AlignHCenter
-                iconSource: "irc-voice"
-                tooltip: i18n("Ring the phone")
-                onClicked: findMyPhone.ring()
-            }
-            PlasmaComponents.ToolButton {
-                id: dismissButton
-                visible: (notificationsModel.count > 0 && notificationsModel.isAnyDimissable)
-                Layout.alignment: Qt.AlignHCenter
-                iconSource: "edit-clear-history"
-                tooltip: i18n("Dismiss all notifications")
-                onClicked: notificationsModel.dismissAll()
-            }
-
-            PlasmaComponents.Label {
-                id: batteryStatus
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignRight
-                font.pixelSize: root.mediumFontSize
-                font.weight: Font.Bold
-                font.capitalization: Font.Capitalize
-                horizontalAlignment: Text.AlignRight
-                text: kdeConnectDevice.batteryStatus
-            }
-            PlasmaCore.IconItem {
-                id: batteryIcon
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignRight
-                source: kdeConnectDevice.batteryIcon
-            }
-            PlasmaCore.IconItem {
-                id: networkIcon
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignRight
-                source: kdeConnectDevice.networkIcon
-            }
-        }
+        //clip: true
         // Notifications
         ListView {
             id: notificationsView
+            property var debugModel: ListModel {
+                ListElement {
+                    appName: "appName1"
+                    title: "title1"
+                    notitext: "notitext1"
+                    name: "name1"
+                    appIcon: "battery"
+                }
+                ListElement {
+                    appName: "appName2"
+                    title: "title2"
+                    notitext: "notitext2"
+                    name: "name2"
+                    appIcon: "battery"
+                }
+            }
+            //model: debugModel
             model: notificationsModel
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.topMargin: root.largeSpacing
             height: 0.7*root.sectionHeight
             spacing: root.smallSpacing
+            interactive: false
             clip: true
-            delegate: SwipeDelegate {
+            delegate: Lib.Swipeable {
                 id: notificationItem
                 width: notificationsView.width
                 height: 0.7*root.sectionHeight/3 - notificationsView.spacing
-                background: Rectangle {
-                    border.color: "#FFFFFF"
-                    border.width: 1
-                    color: "transparent"
-                    opacity: 0.1
-                }
-                PlasmaCore.IconItem {
-                    id: notificationIcon
-                    source: appIcon
-                    height: notificationItem.height*0.8
-                    width: height
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.margins: notificationItem.height*0.1
-                }
-                PlasmaComponents.Label {
-                    text: appName + ": " + (title.length>0 ? (appName==title?notitext:title+": "+notitext) : model.name)
-                    anchors {
-                        right: parent.right
-                        left: notificationIcon.right
-                        top: parent.top
-                        bottom: parent.bottom
-                        leftMargin: root.smallSpacing
-                    }
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
-                    wrapMode: Text.WordWrap
-                }
 
+                border.color: "#FFFFFF"
+                border.width: 1
+                borderOpacity: 0.1
+
+                textCentre: appName + ": " + (title.length>0 ? (appName==title?notitext:title+": "+notitext) : name)
+                iconCentre: appIcon
+                textCentreColor: textCentreColor
+
+                textRight: "Delete"
+                textRightColor: "white"
+                colorRight: "tomato"
+                iconRight: "emblem-error"
+
+                textLeft: "Reply"
+                textLeftColor: "black"
+                colorLeft: "#30f030"
+                iconLeft: "emblem-checked"
+
+                onOpenLeft: dbusInterface.reply()
+                onOpenRight: dbusInterface.dismiss()
 
                 ListView.onRemove: SequentialAnimation {
                     PropertyAction {
@@ -276,37 +237,98 @@ Lib.Card {
                         value: false
                     }
                 }
-                onClicked: swipe.close()
-                swipe.right: Label {
-                    id: deleteLabel
-                    text: qsTr("Delete")
-                    color: "white"
-                    verticalAlignment: Label.AlignVCenter
-                    padding: 12
-                    height: parent.height
-                    anchors.right: parent.right
+            }
+        }
+    }
+    Item {
+        id: header
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            margins: root.smallSpacing
+        }
+        height: buttonRow.height
 
-                    SwipeDelegate.onClicked: dbusInterface.dismiss()
+        RowLayout {
+            anchors.fill: parent
+            spacing: 0
 
-                    background: Rectangle {
-                        color: deleteLabel.SwipeDelegate.pressed ? Qt.darker("tomato", 1.1) : "tomato"
+            PlasmaComponents.Label {
+                id: deviceName
+                text: model.name
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignLeft
+                font.pixelSize: root.largeFontSize
+                font.weight: Font.Bold
+                font.capitalization: Font.Capitalize
+            }
+            Item {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignRight
+
+                PlasmaComponents.Label {
+                    id: batteryStatus
+                    anchors {
+                        right: batteryIcon.left
+                        verticalCenter: parent.verticalCenter
+                        rightMargin: root.smallSpacing
                     }
+                    font.pixelSize: root.mediumFontSize
+                    font.weight: Font.Bold
+                    font.capitalization: Font.Capitalize
+                    horizontalAlignment: Text.AlignRight
+                    text: kdeConnectDevice.batteryStatus
                 }
-                swipe.left: Label {
-                    id: replyLabel
-                    visible: repliable
-                    enabled: repliable
-                    text: i18n("Reply")
-                    color: "white"
-                    verticalAlignment: Label.AlignVCenter
-                    padding: 12
-                    height: parent.height
-                    anchors.left: parent.left
+                PlasmaCore.IconItem {
+                    id: batteryIcon
+                    anchors {
+                        right: networkIcon.left
+                        verticalCenter: parent.verticalCenter
+                        rightMargin: root.smallSpacing
+                    }
+                    source: kdeConnectDevice.batteryIcon
+                }
+                PlasmaCore.IconItem {
+                    id: networkIcon
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
+                    source: kdeConnectDevice.networkIcon
+                }
+            }
+        }
+        Item {
+            id: buttons
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            RowLayout {
+                id: buttonRow
+                anchors.top: parent.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                spacing: 0
+                Repeater {
+                    model: kdeConnectDevice.buttonIcon.length
+                    ToolButton {
+                        id: button
 
-                    SwipeDelegate.onClicked: dbusInterface.reply()
+                        property string buttonIcon: kdeConnectDevice.buttonIcon[index]
+                        property string buttonTooltip: kdeConnectDevice.buttonTooltip[index]
 
-                    background: Rectangle {
-                        color: replyLabel.SwipeDelegate.pressed ? Qt.darker("#30f030", 1.1) : "#30f030"
+                        visible: buttonIcon != ""
+                        icon.name: buttonIcon
+                        icon.source: buttonIcon
+                        height: 24//icon.height
+                        width: 24//icon.width
+                        ToolTip.delay: 500
+                        ToolTip.text: buttonTooltip
+                        ToolTip.visible: hovered
+                        onClicked: kdeConnectDevice.buttonPress(index)
                     }
                 }
             }

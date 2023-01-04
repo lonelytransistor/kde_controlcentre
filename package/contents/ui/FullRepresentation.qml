@@ -1,26 +1,17 @@
-import QtQml 2.0
-import QtQuick 2.0
+import QtQuick 2.15
 import QtQuick.Layouts 1.15
-import QtQuick.Controls 2.0
 
 import org.kde.plasma.plasmoid 2.0
-import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.extras 2.0 as PlasmaExtras
-import org.kde.plasma.components 2.0 as PlasmaComponents
 
-import org.kde.kdeconnect 1.0
-
-import "lib" as Lib
-import "components" as Components
-import "js/funcs.js" as Funcs 
-
+import "lib"
+import "Components" as Components
 
 Item {
     id: fullRep
-    
+
     // PROPERTIES
     Layout.preferredWidth: root.fullRepWidth
-    Layout.preferredHeight: wrapper.implicitHeight
+    Layout.preferredHeight: componentContainer.implicitHeight
     Layout.minimumWidth: Layout.preferredWidth
     Layout.maximumWidth: Layout.preferredWidth
     Layout.minimumHeight: Layout.preferredHeight
@@ -28,52 +19,69 @@ Item {
     clip: true
     
     // Lists all available network connections
-    Components.SectionNetworks{
-        id: sectionNetworks
-    }
+    //Components.SectionNetworks{
+    //    id: sectionNetworks
+    //}
 
-    // Main wrapper
     ColumnLayout {
-        id: wrapper
-
+        id: componentContainer
         anchors.fill: parent
         spacing: 0
-
-        RowLayout {
-            id: sectionA
-
-            spacing: 0
-            Layout.fillWidth: true
-            Layout.preferredHeight: root.sectionHeight
-            Layout.maximumHeight: root.sectionHeight
-            
-            // Network, Bluetooth and Settings Button
-            Components.SectionButtons{}
-
-            // Cast, Share and DND Button
-            Components.SectionButtons2{}
-        }
-        Item {
-            Layout.fillHeight: true
-        }
-        ColumnLayout {
-            id: sectionB
-
-            spacing: 0
-            Layout.fillWidth: true
-
-            Repeater {
-                model: DevicesModel {
-                    displayFilter: DevicesModel.Paired | DevicesModel.Reachable
+        Rectangle {
+            anchors.fill: parent
+            color: "black"
+            opacity: 0.3 * root.cards.fraction
+            z: 1
+            TouchArea {
+                anchors.fill: parent
+                enabled: root.cards.fraction == 1.0
+                z: 1
+                onTouchPress: {
+                    ev.accepted = true;
                 }
-                Components.KDEConnect {}
+                onTouchRelease: {
+                    root.cards.collapseAll();
+                    ev.accepted = true;
+                }
+                onMousePress: {
+                    root.cards.collapseAll();
+                    ev.accepted = true;
+                }
+                onMouseRelease: {
+                    ev.accepted = true;
+                }
             }
-            Components.MediaPlayer{}
-            Components.Volume{}
-            Components.BrightnessSlider{}
-            Components.Battery{}
         }
-        
+    }
 
+    property var objects: []
+    readonly property var components: Item {
+        property var battery: Component{Components.Battery{}}
+        property var volume: Component{Components.Volume{}}
+        property var mpris: Component{Components.MPRIS2{}}
+        property var brightness: Component{Components.Brightness{}}
+        property var kdeconnect: Component{Components.KDEConnect{}}
+    }
+    readonly property var config: plasmoid.configuration.widgetOrder
+    onConfigChanged: instantiateComponents()
+    function instantiateComponents() {
+        let order = config.split(",").filter(n => n);
+
+        while (objects.length > 0) {
+            objects.pop().destroy();
+        }
+
+        for (var ix = 0; ix < order.length; ix++) {
+            var component = components[order[ix]];
+            if (component) {
+                objects.push(component.createObject(componentContainer, {}));
+            } else {
+                console.log("Unknown component uuid:", order[ix]);
+            }
+        }
+    }
+    GlobalTouchArea {
+        id: touchRoot
+        anchors.fill: parent
     }
 }
