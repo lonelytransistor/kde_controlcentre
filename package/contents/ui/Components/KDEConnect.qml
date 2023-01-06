@@ -11,18 +11,13 @@ Repeater {
     model: DevicesModel {
         displayFilter: DevicesModel.Paired | DevicesModel.Reachable
     }
-    Layout.fillHeight: true
-    Layout.fillWidth: true
-    width: parent.width
 
     DropArea {
         id: fileDropArea
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.minimumHeight: height
-        Layout.margins: root.smallSpacing
         height: kdeRoot.height
-        width: parent.width
+        width: global.fullRepWidth
+        onHeightChanged: if (parent) parent.height = kdeRoot.height
+        onWidthChanged: if (parent) parent.width = global.fullRepWidth
 
         readonly property variant share: ShareDbusInterfaceFactory.create(model.deviceId)
         property bool dropping: false
@@ -54,7 +49,7 @@ Repeater {
         PlasmaComponents.Label {
             id: fileDropLabel
             anchors.fill: parent
-            font.pixelSize: root.largeFontSize
+            font.pixelSize: global.largeFontSize
             font.weight: Font.Bold
             font.capitalization: Font.Capitalize
             horizontalAlignment: Text.AlignHCenter
@@ -72,10 +67,10 @@ Repeater {
             readonly property variant network:     DeviceConnectivityReportDbusInterfaceFactory.create(model.deviceId)
             readonly property variant findMyPhone: FindMyPhoneDbusInterfaceFactory.create(model.deviceId)
             readonly property variant sftp:        SftpDbusInterfaceFactory.create(model.deviceId)
-            readonly property var icon:            root.misc.getIcon
+            readonly property var icon:            global.misc.getIcon
 
             leftTitle: model.name
-            rightTitle: (battery.isCharging ? "🗲" : "") + battery.charge + "%"
+            rightTitle: (battery.isCharging ? "🗲 " : "") + battery.charge + "%"
 
             buttons: [{
                 "icon": "document-open-folder",
@@ -124,13 +119,13 @@ Repeater {
                     Layout.preferredHeight: height
                     height: (children[0].children.length ? Math.min(model.count, 3)*(children[0].children[0].height + spacing) : 0) - spacing
                     width: parent.width
-                    spacing: root.smallSpacing
+                    spacing: global.smallSpacing
                     interactive: false
                     clip: true
                     delegate: Lib.Swipeable {
                         id: notificationItem
                         width: notificationsView.width
-                        height: 0.7*root.sectionHeight/3 - notificationsView.spacing
+                        height: 0.7*global.sectionHeight/3 - notificationsView.spacing
 
                         border.color: "#FFFFFF"
                         border.width: 1

@@ -14,33 +14,40 @@ Item {
     property var buttons: []
     property string leftTitle: ""
     property string leftSubtitle: ""
+    property string centerSubtitle: ""
     property string rightTitle: ""
     property string rightSubtitle: ""
 
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-    Layout.margins: root.smallSpacing
-    Layout.minimumHeight: height
-    height: cardRootOffset.smallHeight
-    width: parent.width
+    height: pHeight
+    width: pWidth
 
     z: cardRootOffset.fraction>0.0 ? 2 : 0
 
     property bool isExpanded: cardRootOffset.state == "expanded";
-    readonly property var expand: function() {root.cards.expand(cardRoot, cardRootOffset)}
-    readonly property var collapse: function() {root.cards.collapse(cardRoot, cardRootOffset)}
+    readonly property var expand: function() {global.cards.expand(cardRoot, cardRootOffset)}
+    readonly property var collapse: function() {global.cards.collapse(cardRoot, cardRootOffset)}
+    readonly property int pHeight: cardRootOffset.smallHeight + 2*global.smallSpacing
+    readonly property int pWidth: global.fullRepWidth
 
     signal expanded
     signal collapsed
 
+    objectName: "Card"
+
     Item {
         id: normalView
-        anchors.fill: parent
+        anchors {
+            fill: parent
+            leftMargin: global.smallSpacing
+            rightMargin: global.smallSpacing
+            topMargin: global.smallSpacing/2
+            bottomMargin: global.smallSpacing/2
+        }
 
         Glow {
             id: shadow
             anchors.fill: cardRootOffset
-            radius: root.mediumSpacing
+            radius: global.mediumSpacing
             samples: 17
             color: "black"
             source: cardRootOffset
@@ -55,12 +62,12 @@ Item {
             clip: true
 
             property double fraction: 0.0
-            onFractionChanged: root.cards.update(fraction)
+            onFractionChanged: global.cards.update(fraction)
             property int duration: 200
 
             property int pHeight: Math.max(Math.max(leftTitle!=""?leftTitleO.height:0, rightTitle!=""?rightTitleO.height:0) +
                                         Math.max(leftSubtitle!=""?leftSubtitleO.height:0, rightSubtitle!=""?rightSubtitleO.height:0),
-                                        buttonsO.height) + root.mediumSpacing
+                                        buttonsO.height) + global.mediumSpacing
             property int smallHeight: pHeight + smallRepresentation.height
             property int bigHeight: pHeight + bigRepresentation.height
             property int bigOffset: 0
@@ -181,11 +188,11 @@ Item {
                     top: parent.top
                     left: parent.left
                     right: rightTitleO.text ? parent.horizontalCenter : parent.right
-                    leftMargin: root.mediumSpacing
-                    rightMargin: root.mediumSpacing
+                    leftMargin: global.mediumSpacing
+                    rightMargin: global.mediumSpacing
                 }
                 text: cardRoot.leftTitle
-                font.pixelSize: root.largeFontSize
+                font.pixelSize: global.largeFontSize
                 font.weight: Font.Bold
                 font.capitalization: Font.Capitalize
                 elide: Text.ElideRight
@@ -196,11 +203,22 @@ Item {
                     top: leftTitleO.bottom
                     left: parent.left
                     right: rightSubtitleO.text ? parent.horizontalCenter : parent.right
-                    leftMargin: root.mediumSpacing
-                    rightMargin: root.mediumSpacing
+                    leftMargin: global.mediumSpacing
+                    rightMargin: global.mediumSpacing
                 }
                 text: cardRoot.leftSubtitle
-                font.pixelSize: root.mediumFontSize
+                font.pixelSize: global.mediumFontSize
+                font.capitalization: Font.Capitalize
+                elide: Text.ElideRight
+            }
+            PlasmaComponents.Label {
+                id: centerSubtitleO
+                anchors {
+                    top: leftTitleO.bottom
+                    horizontalCenter: parent.horizontalCenter
+                }
+                text: cardRoot.centerSubtitle
+                font.pixelSize: global.mediumFontSize
                 font.capitalization: Font.Capitalize
                 elide: Text.ElideRight
             }
@@ -210,11 +228,11 @@ Item {
                     top: parent.top
                     left: leftTitleO.text ? parent.horizontalCenter : parent.left
                     right: parent.right
-                    leftMargin: root.mediumSpacing
-                    rightMargin: root.mediumSpacing
+                    leftMargin: global.mediumSpacing
+                    rightMargin: global.mediumSpacing
                 }
                 text: cardRoot.rightTitle
-                font.pixelSize: root.largeFontSize
+                font.pixelSize: global.largeFontSize
                 font.weight: Font.Bold
                 font.capitalization: Font.Capitalize
                 horizontalAlignment: Text.AlignRight
@@ -226,11 +244,11 @@ Item {
                     top: rightTitleO.bottom
                     left: leftSubtitleO.text ? parent.horizontalCenter : parent.left
                     right: parent.right
-                    leftMargin: root.mediumSpacing
-                    rightMargin: root.mediumSpacing
+                    leftMargin: global.mediumSpacing
+                    rightMargin: global.mediumSpacing
                 }
                 text: cardRoot.rightSubtitle
-                font.pixelSize: root.mediumFontSize
+                font.pixelSize: global.mediumFontSize
                 font.capitalization: Font.Capitalize
                 horizontalAlignment: Text.AlignRight
                 elide: Text.ElideMiddle
@@ -240,9 +258,9 @@ Item {
                 anchors {
                     top: parent.top
                     horizontalCenter: parent.horizontalCenter
-                    topMargin: root.smallSpacing
+                    topMargin: global.smallSpacing
                 }
-                spacing: root.smallSpacing
+                spacing: global.smallSpacing
                 Repeater {
                     model: cardRoot.buttons.length
                     ToolButton {
@@ -280,24 +298,24 @@ Item {
             }
             ColumnLayout {
                 id: smallRepresentation
-                spacing: root.smallSpacing
+                spacing: global.smallSpacing
                 anchors {
                     top: leftSubtitle!=""||rightSubtitle!="" ? leftSubtitleO.bottom : leftTitleO.bottom
                     left: cardRootOffset.fraction==1 ? parent.right : parent.left
-                    leftMargin: root.smallSpacing
+                    leftMargin: global.smallSpacing
                 }
-                width: parent.width - root.smallSpacing*2
+                width: parent.width - global.smallSpacing*2
                 opacity: 1.0 - cardRootOffset.fraction
             }
             ColumnLayout {
                 id: bigRepresentation
-                spacing: root.smallSpacing
+                spacing: global.smallSpacing
                 anchors {
                     top: leftSubtitle!=""||rightSubtitle!="" ? leftSubtitleO.bottom : leftTitleO.bottom
                     left: cardRootOffset.fraction==0 ? parent.right : parent.left
-                    leftMargin: root.smallSpacing
+                    leftMargin: global.smallSpacing
                 }
-                width: parent.width - root.smallSpacing*2
+                width: parent.width - global.smallSpacing*2
                 opacity: cardRootOffset.fraction
             }
         }

@@ -17,7 +17,7 @@ DropArea {
 
     PlasmaCore.IconItem {
         anchors.fill: parent
-        source: root.mainIconName
+        source: global.mainIconName
         smooth: true
 
         MouseArea {

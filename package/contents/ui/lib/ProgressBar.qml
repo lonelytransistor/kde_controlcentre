@@ -22,7 +22,7 @@ Item {
 
     PlasmaCore.IconItem {
         id: icon
-        height: root.largeFontSize*2
+        height: global.largeFontSize*2
         width: height
         MouseArea {
             anchors.fill: parent
@@ -33,7 +33,7 @@ Item {
         id: control
         anchors {
             left: icon.source ? icon.right : parent.left
-            leftMargin: root.smallSpacing
+            leftMargin: global.smallSpacing
             right: parent.right
             verticalCenter: parent.verticalCenter
         }

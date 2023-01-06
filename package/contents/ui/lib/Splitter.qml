@@ -5,15 +5,15 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 Item {
     Layout.fillWidth: true
     Layout.fillHeight: true
-    Layout.margins: root.smallSpacing
+    Layout.margins: global.smallSpacing
     Layout.preferredHeight: height
     height: 1
     clip: true
     PlasmaCore.FrameSvgItem {
         anchors {
             fill: parent
-            leftMargin: -root.smallSpacing
-            rightMargin: -root.smallSpacing
+            leftMargin: -global.smallSpacing
+            rightMargin: -global.smallSpacing
         }
         imagePath: "opaque/dialogs/background"
     }

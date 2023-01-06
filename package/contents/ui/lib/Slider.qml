@@ -9,21 +9,40 @@ Item {
     property alias icon: icon.source
     property alias value: control.value
     property alias from: control.from
+    property alias step: control.stepSize
     property alias to: control.to
+    property alias info: info.text
+    property alias title: title.text
     property int highlight: 0
 
     signal moved
+    signal pressed
     signal released
     signal iconPressed
 
-    height: icon.height
+    height: title.visible ? icon.height + title.height : icon.height
     width: parent.width
     Layout.fillHeight: true
     Layout.fillWidth: true
 
+    PlasmaComponents.Label {
+        id: title
+        anchors {
+            top: parent.top
+            horizontalCenter: parent.horizontalCenter
+        }
+        font.pixelSize: global.mediumFontSize
+        font.weight: Font.Bold
+        font.capitalization: Font.Capitalize
+        visible: text!=""
+    }
     PlasmaCore.IconItem {
         id: icon
-        height: root.largeFontSize*2
+        anchors {
+            left: parent.left
+            verticalCenter: control.verticalCenter
+        }
+        height: global.largeFontSize*2
         width: height
         MouseArea {
             anchors.fill: parent
@@ -34,13 +53,16 @@ Item {
         id: control
         anchors {
             left: icon.source ? icon.right : parent.left
-            leftMargin: root.smallSpacing
-            right: parent.right
-            top: parent.top
+            leftMargin: global.smallSpacing
+            right: info.text ? info.left : parent.right
+            rightMargin: global.smallSpacing
+            top: title.visible ? title.bottom : parent.top
+            topMargin: title.visible ? -title.height*0.25 : 0
             bottom: parent.bottom
         }
         from: 0
         to: 100
+        snapMode: stepSize ? PlasmaComponents.Slider.SnapAlways : PlasmaComponents.Slider.NoSnap
         property double highlight: (sliderRoot.highlight - from)/(to - from)
         Behavior on highlight {
             NumberAnimation  {
@@ -50,8 +72,11 @@ Item {
         }
         onMoved: parent.moved();
         onPressedChanged: {
-            if (!pressed)
+            if (pressed) {
+                parent.pressed();
+            } else {
                 parent.released();
+            }
         }
         background: PlasmaCore.FrameSvgItem {
             imagePath: "widgets/slider"
@@ -94,5 +119,17 @@ Item {
                 height: control.vertical ? Math.max(fixedMargins.top + fixedMargins.bottom, Math.round(control.highlight * control.position * control.availableHeight)) : parent.height
             }
         }
+    }
+    PlasmaComponents.Label {
+        id: info
+        anchors {
+            right: parent.right
+            rightMargin: global.smallSpacing
+            verticalCenter: control.verticalCenter
+        }
+        elide: Text.ElideRight
+        font.weight: Font.Bold
+        font.pixelSize: global.largeFontSize
+        visible: text!=""
     }
 }

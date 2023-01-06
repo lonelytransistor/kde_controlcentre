@@ -3,78 +3,42 @@ import QtQuick.Layouts 1.15
 
 import org.kde.plasma.plasmoid 2.0
 
-import "lib"
+import "private" as Private
 import "Components" as Components
 
+// Despite all of this being an ugly hack, this works waaaay better in terms of dynamically adjusted plasmoid size.
+// It's a code only a mother could love. So I guess I like it.
 Item {
-    id: fullRep
+    width: fullRep.width
+    height: fullRep.height
+    onWidthChanged: if (parent) parent.width = fullRep.width
+    onHeightChanged: if (parent) parent.height = fullRep.height
 
-    Layout.preferredWidth: root.fullRepWidth
-    Layout.preferredHeight: componentContainer.implicitHeight
-    Layout.minimumWidth: Layout.preferredWidth
-    Layout.maximumWidth: Layout.preferredWidth
-    Layout.minimumHeight: Layout.preferredHeight
-    Layout.maximumHeight: Layout.preferredHeight
-    clip: true
-    
-    ColumnLayout {
-        id: componentContainer
-        anchors.fill: parent
-        spacing: 0
-        Rectangle {
-            anchors.fill: parent
-            color: "black"
-            opacity: 0.3 * root.cards.fraction
-            z: 1
-            TouchArea {
-                anchors.fill: parent
-                enabled: root.cards.fraction == 1.0
-                z: 1
-                onTouchPress: {
-                    ev.accepted = true;
-                }
-                onTouchRelease: {
-                    root.cards.collapseAll();
-                    ev.accepted = true;
-                }
-                onMousePress: {
-                    root.cards.collapseAll();
-                    ev.accepted = true;
-                }
-                onMouseRelease: {
-                    ev.accepted = true;
-                }
-            }
-        }
-    }
-    GlobalTouchArea {
-        id: touchRoot
-        anchors.fill: parent
-    }
+    ListView {
+        id: fullRep
+        readonly property var config: plasmoid.configuration.widgetOrder.split(",").filter(n => n)
+        interactive: false
+        model: config
+        width: global.fullRepWidth
+        height: global.misc.object.sum(children && children.length ? children[0].children : null, "height", n => n.objectName && n.objectName!=="dismiss");
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
 
-    property var objects: []
-    readonly property var components: Item {
         property var battery: Component{Components.Battery{}}
         property var volume: Component{Components.Volume{}}
         property var mpris: Component{Components.MPRIS2{}}
         property var brightness: Component{Components.Brightness{}}
         property var kdeconnect: Component{Components.KDEConnect{}}
-    }
-    readonly property var config: plasmoid.configuration.widgetOrder
-    onConfigChanged: instantiateComponents()
-    function instantiateComponents() {
-        let order = config.split(",").filter(n => n);
-        while (objects.length > 0) {
-            objects.pop().destroy();
-        }
 
-        for (var ix = 0; ix < order.length; ix++) {
-            var component = components[order[ix]];
-            if (component) {
-                objects.push(component.createObject(componentContainer, {}));
-            } else {
-                console.log("Unknown component uuid:", order[ix]);
-            }
+        delegate: Private.RootLoader {
+            objectName: fullRep.config[model.index]
+            sourceComponent: objectName == "battery"    ? fullRep.battery :
+                             objectName == "volume"     ? fullRep.volume :
+                             objectName == "mpris"      ? fullRep.mpris :
+                             objectName == "brightness" ? fullRep.brightness :
+                             objectName == "kdeconnect" ? fullRep.kdeconnect : null
         }
+        Private.DismissArea{}
+        Private.GlobalTouchArea{id:touchRoot}
     }
 }

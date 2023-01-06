@@ -4,14 +4,14 @@ import QtQuick.Layouts 1.15
 import "../lib" as Lib
 
 Lib.Card {
-    readonly property var battery: root.sources.powerManagement.battery
+    readonly property var battery: global.sources.powerManagement.battery
     readonly property var inhibitions: sources.powerManagement.inhibitions
     readonly property var lid: sources.powerManagement.lid
     readonly property var history: battery.history.charge
 
     leftTitle: "Battery"
     leftSubtitle: battery.status
-    rightTitle: battery.percent + "%"
+    rightTitle: (battery.charging ? "🗲 " : "") + battery.percent + "%"
     rightSubtitle: battery.timeStatus
 
     buttons: [{
@@ -45,13 +45,17 @@ Lib.Card {
                 if (inhibitions.list.length == 0) {
                     return ""
                 } else if (inhibitions.list.length == 1) {
-                    return inhibitions.list[0]["Name"] + " blocks sleep."
+                    var name = inhibitions.list[0]["Name"];
+                    var icon = inhibitions.list[0]["Icon"];
+                    return (icon ? "|icon:" + icon + "|" : name) + " blocks sleep."
                 } else {
                     let text = ""
                     for (let ix in inhibitions.list) {
+                        var name = inhibitions.list[ix]["Name"];
+                        var icon = inhibitions.list[ix]["Icon"];
                         if (ix != 0)
                             text += ", "
-                        text += inhibitions.list[ix]["Name"]
+                        text += (icon ? "|icon:" + icon + "|" : name)
                     }
                     text += " block sleep."
                     return text
@@ -63,6 +67,7 @@ Lib.Card {
         Lib.ProgressBar {
             icon: battery.icon
             value: battery.percent
+            highlight: Math.max(0, Math.min(battery.rate, 100))
         },
         Lib.Graph {
             id: graph

@@ -59,7 +59,7 @@ Item {
             readonly property double minutes: Math.floor(pmSource.remaining/60)
             readonly property double seconds: Math.floor(pmSource.remaining)
         }
-        readonly property string icon: root.misc.getIcon.volume(pmSource.now, pmSource.isCharging)
+        readonly property string icon: global.misc.getIcon.volume(pmSource.now, pmSource.isCharging)
         readonly property string status: pmSource.status
         readonly property string timeStatus: pmSource.status2
         readonly property var history: Item {
@@ -135,30 +135,38 @@ Item {
         }
     }
     readonly property var brightness: Item {
-        property int screen: pmSource.brightnessScreen
-        property int keyboard: pmSource.brightnessKbd
-        onScreenChanged: {
-            if (screen != pmSource.brightnessScreen) {
-                const service = pmSource.serviceForSource("PowerDevil");
-                const operation = service.operationDescription("setBrightness");
-                operation.brightness = screen;
+        readonly property var screen: Item {
+            readonly property int min: 0
+            readonly property int max: pmSource.brightnessScreenMax
+            property int value: pmSource.brightnessScreen
+            onValueChanged: {
+                if (value != pmSource.brightnessScreen) {
+                    const service = pmSource.serviceForSource("PowerDevil");
+                    const operation = service.operationDescription("setBrightness");
+                    operation.brightness = value;
 
-                const job1 = service.startOperationCall(operation);
-                job1.finished.connect(job => {
-                    screen = pmSource.brightnessScreen;
-                });
+                    const job1 = service.startOperationCall(operation);
+                    job1.finished.connect(job => {
+                        value = pmSource.brightnessScreen;
+                    });
+                }
             }
         }
-        onKeyboardChanged: {
-            if (keyboard != pmSource.brightnessKbd) {
-                const service = pmSource.serviceForSource("PowerDevil");
-                const operation = service.operationDescription("setKeyboardBrightness");
-                operation.brightness = keyboard;
+        readonly property var keyboard: Item {
+            readonly property int min: 0
+            readonly property int max: pmSource.brightnessKbdMax
+            property int value: pmSource.brightnessKbd
+            onValueChanged: {
+                if (value != pmSource.brightnessKbd) {
+                    const service = pmSource.serviceForSource("PowerDevil");
+                    const operation = service.operationDescription("setKeyboardBrightness");
+                    operation.brightness = value;
 
-                const job1 = service.startOperationCall(operation);
-                job1.finished.connect(job => {
-                    keyboard = pmSource.brightnessKbd;
-                });
+                    const job1 = service.startOperationCall(operation);
+                    job1.finished.connect(job => {
+                        value = pmSource.brightnessKbd;
+                    });
+                }
             }
         }
     }
@@ -177,7 +185,9 @@ Item {
         property string status2
         property var inhibitions: []
         property var brightnessKbd: 0
+        property var brightnessKbdMax: 0
         property var brightnessScreen: 0
+        property var brightnessScreenMax: 0
         onSourceAdded: {
             disconnectSource(source);
             connectSource(source);
@@ -188,8 +198,10 @@ Item {
         onDataChanged: {
             if (data) {
                 if (data["PowerDevil"]) {
-                    brightnessScreen = data["PowerDevil"]["Screen Brightness"]
                     brightnessKbd = data["PowerDevil"]["Keyboard Brightness"]
+                    brightnessKbdMax = data["PowerDevil"]["Maximum Keyboard Brightness"]
+                    brightnessScreen = data["PowerDevil"]["Screen Brightness"]
+                    brightnessScreenMax = data["PowerDevil"]["Maximum Screen Brightness"]
                 }
                 if (data["Inhibitions"]) {
                     let inhibitions_p = []
@@ -205,15 +217,7 @@ Item {
                     remaining = Math.abs(data["Battery"]["Remaining msec"]<<0>>0)/1000
                     isCharging = data["Battery"]["State"] != "Discharging"
 
-                    let remainingHours = Math.floor(remaining/3600)
-                    let remainingMinutes = Math.round(remaining/60 - remainingHours*60)
-                    remainingMinutes = (remainingMinutes < 10 ? "0" : "") + remainingMinutes
-
-                    if (remainingHours > 24 || (remainingHours == 0 && remainingMinutes == 0)) {
-                        status2 = ""
-                    } else {
-                        status2 = (isCharging ? "Time to full: " : "Time left: ") + remainingHours + ":" + remainingMinutes
-                    }
+                    status2 = (isCharging ? "Time to full: " : "Time left: ") + global.misc.time.printf(remaining*1000, "%h:%M")
                     status  =  isCharging ? "Charging" : "Discharging"
                     now = data["Battery"]["Percent"]
                     rate = Math.round(3600.0*now/remaining);

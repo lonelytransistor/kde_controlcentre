@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.components 3.0 as PlasmaComponents
 
 import "../lib" as Lib
@@ -9,9 +10,10 @@ import "../lib" as Lib
 Lib.Card {
     id: volumeRoot
 
-    readonly property var mpris2: root.sources.mpris2
+    readonly property var mpris2: global.sources.mpris2
     readonly property var multiplex: mpris2.multiplex ? mpris2.multiplex : {}
     readonly property var players: mpris2.players ? mpris2.players : {}
+    readonly property var printf: global.misc.time.printf
 
     leftTitle: {
         if (multiplex.title) {
@@ -29,6 +31,20 @@ Lib.Card {
             return "Unknown artist"
         }
     }
+    Timer {
+        running: plasmoid.expanded
+        repeat: true
+        interval: 1000
+        triggeredOnStart: true
+        onTriggered: {
+            if (volumeRoot.isExpanded) {
+                for (var player of volumeRoot.players) {
+                    player.update();
+                }
+            }
+            volumeRoot.multiplex.update();
+        }
+    }
 
     small: [
         Item {
@@ -39,7 +55,7 @@ Lib.Card {
                 anchors {
                     left: parent.left
                     bottom: parent.bottom
-                    leftMargin: root.smallSpacing
+                    leftMargin: global.smallSpacing
                 }
                 width: 60
                 height: 60
@@ -53,7 +69,7 @@ Lib.Card {
                     top: parent.top
                     bottom: parent.bottom
                     right: playBTN.left
-                    rightMargin: root.smallSpacing
+                    rightMargin: global.smallSpacing
                 }
                 icon.name: "media-skip-backward"
                 onClicked: multiplex.prev()
@@ -64,7 +80,7 @@ Lib.Card {
                     top: parent.top
                     bottom: parent.bottom
                     right: nextBTN.left
-                    rightMargin: root.smallSpacing
+                    rightMargin: global.smallSpacing
                 }
                 icon.name: multiplex.isPlaying ? "media-playback-pause" : "media-playback-start"
                 onClicked: multiplex.isPlaying ? multiplex.pause() : multiplex.play()
@@ -75,7 +91,7 @@ Lib.Card {
                     top: parent.top
                     bottom: parent.bottom
                     right: parent.right
-                    rightMargin: root.smallSpacing
+                    rightMargin: global.smallSpacing
                 }
                 icon.name: "media-skip-forward"
                 onClicked: multiplex.next()
@@ -84,6 +100,8 @@ Lib.Card {
         Lib.Slider {
             id: playbackSlider
             value: position
+            Layout.topMargin: -global.mediumFontSize*2.5
+            title: printf(multiplex.position/1000, "%M:%S/") + printf(multiplex.length/1000, "%M:%S")
             onReleased: multiplex.seekTo(Math.round(value*multiplex.length/100));
             onIconPressed: multiplex.raise();
 
@@ -103,10 +121,10 @@ Lib.Card {
             Layout.preferredWidth: width
             Layout.preferredHeight: height
             width: parent.width
-            height: players.length==0 ? root.mediumFontSize*2 : 0
+            height: players.length==0 ? global.mediumFontSize*2 : 0
             visible: players.length==0
             text: "No application is playing audio at this moment."
-            font.pixelSize: root.mediumFontSize
+            font.pixelSize: global.mediumFontSize
             font.weight: Font.Bold
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
@@ -133,7 +151,7 @@ Lib.Card {
                     }
                     elide: Text.ElideRight
                     text: pmodel.app + ": " + pmodel.artist + " - " + pmodel.title
-                    font.pixelSize: root.mediumFontSize
+                    font.pixelSize: global.mediumFontSize
                     font.weight: Font.Bold
                     font.capitalization: Font.Capitalize
                 }
@@ -142,7 +160,7 @@ Lib.Card {
                         bottom: parent.bottom
                         left: parent.left
                         right: prevBTN.left
-                        rightMargin: root.smallSpacing
+                        rightMargin: global.smallSpacing
                     }
                     value: position
                     onReleased: pmodel.seekTo(Math.round(value*pmodel.length/100));
@@ -161,7 +179,7 @@ Lib.Card {
                     anchors {
                         bottom: parent.bottom
                         right: playBTN.left
-                        rightMargin: root.smallSpacing
+                        rightMargin: global.smallSpacing
                     }
                     icon.name: "media-skip-backward"
                     onClicked: pmodel.prev()
@@ -171,7 +189,7 @@ Lib.Card {
                     anchors {
                         bottom: parent.bottom
                         right: nextBTN.left
-                        rightMargin: root.smallSpacing
+                        rightMargin: global.smallSpacing
                     }
                     icon.name: pmodel.isPlaying ? "media-playback-pause" : "media-playback-start"
                     onClicked: pmodel.isPlaying ? pmodel.pause() : pmodel.play()
@@ -181,7 +199,7 @@ Lib.Card {
                     anchors {
                         bottom: parent.bottom
                         right: parent.right
-                        rightMargin: root.smallSpacing
+                        rightMargin: global.smallSpacing
                     }
                     icon.name: "media-skip-forward"
                     onClicked: pmodel.next()

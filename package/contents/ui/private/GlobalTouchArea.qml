@@ -5,6 +5,8 @@ import TouchArea 1.0
 
 TouchArea {
     id: touchRoot
+    anchors.fill: parent
+
     property int activeTouches: 0
     property var activeArea: null
     property var areas: []
