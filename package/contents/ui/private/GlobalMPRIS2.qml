@@ -2,6 +2,7 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.1 as PlasmaCore
 
 Item {
+    id: root
     readonly property var players: mpris2Source.players
     readonly property var multiplex: mpris2Source.multiplex
     readonly property var flags: Item {
@@ -30,6 +31,16 @@ Item {
                 if (!audioData)
                     continue;
                 var audioMetadata = audioData["Metadata"];
+                var capabilities = (
+                    (audioData["CanControl"]    ? root.flags.control:0) |
+                    (audioData["CanGoNext"]     ? root.flags.next:   0) |
+                    (audioData["CanGoPrevious"] ? root.flags.prev:   0) |
+                    (audioData["CanPause"]      ? root.flags.pause:  0) |
+                    (audioData["CanPlay"]       ? root.flags.play:   0) |
+                    (audioData["CanQuit"]       ? root.flags.quit:   0) |
+                    (audioData["CanRaise"]      ? root.flags.raise:  0) |
+                    (audioData["CanSeek"]       ? root.flags.seek:   0)
+                );
                 var audioData2 = {
                     "app": audioData["Identity"] || "Unknown app",
                     "icon": audioData["Desktop Icon Name"] || audioData["DesktopEntry"] || "emblem-music-symbolic",
@@ -43,7 +54,7 @@ Item {
                     "length": audioMetadata["mpris:length"],
                     "volume": Math.round(audioData["Volume"]*100),
                     "isPlaying": audioData["PlaybackStatus"]=="Playing",
-                    "capabilities": (audioData["CanControl"]?0b00000001:0 | audioData["CanGoNext"]?0b00000010:0 | audioData["CanGoPrevious"]?0b00000100:0 | audioData["CanPause"]?0b00001000:0 | audioData["CanPlay"]?0b00010000:0 | audioData["CanQuit"]?0b00100000:0 | audioData["CanRaise"]?0b01000000:0 | audioData["CanSeek"]?0b10000000:0),
+                    "capabilities": capabilities,
                     "_audioData": audioData,
                     "setVolume": function(v) {this._audioData["Volume"]=v*0.01;},
                     "raise": function()      {var s=serviceForSource(this.source);var o=s.operationDescription("Raise");                       s.startOperationCall(o);},
@@ -56,10 +67,13 @@ Item {
                     "seekTo": function(v)    {var s=serviceForSource(this.source);var o=s.operationDescription("SetPosition");o.microseconds=v;s.startOperationCall(o);},
                     "update": function()     {var s=serviceForSource(this.source);var o=s.operationDescription("GetPosition");                 s.startOperationCall(o);}
                 }
-                if (source === multiplexSource) {
-                    multiplex = audioData2;
-                } else {
-                    playerList.push(audioData2);
+                //console.log(capabilities);
+                if (capabilities >> 1) {
+                    if (source === multiplexSource) {
+                        multiplex = audioData2;
+                    } else {
+                        playerList.push(audioData2);
+                    }
                 }
             }
             players = playerList;

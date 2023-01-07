@@ -26,8 +26,8 @@ Item {
     property bool isExpanded: cardRootOffset.state == "expanded";
     readonly property var expand: function() {global.cards.expand(cardRoot, cardRootOffset)}
     readonly property var collapse: function() {global.cards.collapse(cardRoot, cardRootOffset)}
-    readonly property int pHeight: cardRootOffset.smallHeight + 2*global.smallSpacing
-    readonly property int pWidth: global.fullRepWidth
+    readonly property int pHeight: visible ? (cardRootOffset.smallHeight + 2*global.smallSpacing) : 0
+    readonly property int pWidth: visible ? global.fullRepWidth : 0
 
     signal expanded
     signal collapsed

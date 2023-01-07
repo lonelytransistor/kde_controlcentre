@@ -1,5 +1,7 @@
 import QtQuick 2.15
+import QtQuick.Shapes 1.15
 import QtQuick.Layouts 1.15
+import QtQuick.Controls 2.15
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
 
@@ -8,12 +10,14 @@ Item {
 
     property alias icon: icon.source
     property alias value: control.value
+    property alias tooltipValue: tooltip.text
     property alias from: control.from
     property alias step: control.stepSize
     property alias to: control.to
     property alias info: info.text
     property alias title: title.text
     property int highlight: 0
+    property alias isPressed: control.pressed
 
     signal moved
     signal pressed
@@ -69,6 +73,18 @@ Item {
                 duration: PlasmaCore.Units.shortDuration
                 easing.type: Easing.OutQuad
             }
+        }
+        TouchToolTip {
+            id: tooltip
+            parent: control.handle
+            visible: control.pressed && !!text
+        }
+        TouchToolTip {
+            id: tooltip2
+            parent: control.handle
+            text: tooltip.text
+            visible: control.hovered && !tooltip.visible
+            delay: 1000
         }
         onMoved: parent.moved();
         onPressedChanged: {

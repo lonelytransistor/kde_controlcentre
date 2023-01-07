@@ -38,7 +38,8 @@ Item {
                              objectName == "brightness" ? fullRep.brightness :
                              objectName == "kdeconnect" ? fullRep.kdeconnect : null
         }
-        Private.DismissArea{}
+        Component.onCompleted: dismissRoot.parent = (fullRep.children[0].objectName != "dismiss" ? fullRep.children[0] : fullRep)
+        Private.DismissArea{id:dismissRoot}
         Private.GlobalTouchArea{id:touchRoot}
     }
 }

@@ -108,10 +108,14 @@ Item {
     }
     readonly property var time: Item {
         readonly property var printf: function(ms, format) {
-            var hours = Math.floor(ms/3600000);
-            var minutes = Math.floor(ms/60000) - hours*60;
-            var seconds = Math.floor(ms/1000) - hours*3600 - minutes*60;
-            var mseconds = Math.floor(ms) - hours*3600000 - minutes*60000;
+            var hoursF = Math.floor(ms/3600000);
+            var minutesF = Math.floor(ms/60000);
+            var secondsF = Math.floor(ms/1000);
+            var msecondsF = Math.floor(ms);
+            var hours = hoursF;
+            var minutes = minutesF - hours*60;
+            var seconds = secondsF - hours*3600 - minutes*60;
+            var mseconds = msecondsF - hours*3600000 - minutes*60000;
 
             var ret = ""
             for (var fmt of format.split(/(%?.)/g)) {
@@ -119,10 +123,14 @@ Item {
                     ret += (hours < 10 ? "0" : "") + hours
                 } else if (fmt == "%h") {
                     ret += hours
+                } else if (fmt == "%N") {
+                    ret += (minutesF < 10 ? "0" : "") + minutesF
                 } else if (fmt == "%M") {
                     ret += (minutes < 10 ? "0" : "") + minutes
                 } else if (fmt == "%m") {
                     ret += minutes
+                } else if (fmt == "%A") {
+                    ret += (secondsF < 10 ? "0" : "") + secondsF
                 } else if (fmt == "%S") {
                     ret += (seconds < 10 ? "0" : "") + seconds
                 } else if (fmt == "%s") {

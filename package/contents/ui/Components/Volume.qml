@@ -34,6 +34,7 @@ Lib.Card {
             id: volumeSlider
             icon: defaultSink.icon
             value: defaultSink.volume
+            tooltipValue: Math.round(value) + "%"
             onReleased: antiSpamTimer.running = true;
             onMoved: antiSpamTimer.running = true;
             onIconPressed: defaultSink.muted = !defaultSink.muted;
@@ -58,6 +59,7 @@ Lib.Card {
             delegate: Lib.Slider {
                 id: sinkSlider
                 value: Math.round(100*model.Volume/audio.normalVolume)
+                tooltipValue: info
                 info: Math.round(value) + "%"
                 highlight: Math.round(meter.volume*100)
                 onReleased: antiSpamTimer.running = true;
@@ -107,6 +109,7 @@ Lib.Card {
             Layout.fillHeight: true
             delegate: Lib.Slider {
                 id: appSlider
+                tooltipValue: info
                 value: Math.round(100*model.Volume/audio.normalVolume)
                 highlight: Math.round(meter.volume*100)
                 onReleased: antiSpamTimer.running = true;

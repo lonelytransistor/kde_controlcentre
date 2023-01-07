@@ -3,7 +3,6 @@ import org.kde.plasma.plasmoid 2.0
 import "../lib"
 
 Rectangle {
-    parent: fullRep.children[0]
     objectName: "dismiss"
     anchors.fill: parent
     anchors.margins: -50

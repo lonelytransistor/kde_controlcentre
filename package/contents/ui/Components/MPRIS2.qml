@@ -15,6 +15,8 @@ Lib.Card {
     readonly property var players: mpris2.players ? mpris2.players : {}
     readonly property var printf: global.misc.time.printf
 
+    visible: players.length!=0
+
     leftTitle: {
         if (multiplex.title) {
             return multiplex.title
@@ -39,10 +41,14 @@ Lib.Card {
         onTriggered: {
             if (volumeRoot.isExpanded) {
                 for (var player of volumeRoot.players) {
-                    player.update();
+                    if (player.isPlaying) {
+                        player.update();
+                    }
                 }
             }
-            volumeRoot.multiplex.update();
+            if (volumeRoot.multiplex.isPlaying) {
+                volumeRoot.multiplex.update();
+            }
         }
     }
 
@@ -59,7 +65,7 @@ Lib.Card {
                 }
                 width: 60
                 height: 60
-                source: multiplex.art ? multiplex.art : ""
+                source: multiplex.art ? multiplex.art : "../../assets/music.png"
                 fillMode: Image.PreserveAspectFit
                 onStatusChanged: if (status == Image.Error) { source = "../../assets/music.png" }
             }
@@ -100,49 +106,45 @@ Lib.Card {
         Lib.Slider {
             id: playbackSlider
             value: position
-            Layout.topMargin: -global.mediumFontSize*2.5
-            title: printf(multiplex.position/1000, "%M:%S/") + printf(multiplex.length/1000, "%M:%S")
+            Layout.topMargin: -global.mediumFontSize*2
+            title: printf(multiplex.position/1000, "%N:%S/") + printf(multiplex.length/1000, "%N:%S")
+            tooltipValue: printf((isPressed ? value*multiplex.length/100 : multiplex.position)/1000, "%N:%S/") + printf(multiplex.length/1000, "%N:%S")
             onReleased: multiplex.seekTo(Math.round(value*multiplex.length/100));
             onIconPressed: multiplex.raise();
 
             property int position: Math.round(100*multiplex.position/multiplex.length);
-            onPositionChanged: {
-                if (value != position) {
-                    value = position;
-                }
-            }
+            onPositionChanged: if (value != position && !isPressed) value = position;
         }
     ]
     big: [
         Lib.Splitter {},
-        PlasmaComponents.Label {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: width
-            Layout.preferredHeight: height
-            width: parent.width
-            height: players.length==0 ? global.mediumFontSize*2 : 0
-            visible: players.length==0
-            text: "No application is playing audio at this moment."
-            font.pixelSize: global.mediumFontSize
-            font.weight: Font.Bold
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+        Lib.Label {
+            text: volumeRoot.players.length==0 ? "No application is playing audio at this moment." : ""
+            Layout.alignment: Qt.AlignHCenter
         },
         ListView {
             id: playerList
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            property var modelDummy: []
+            readonly property int modelCount: volumeRoot.players.length
+            onModelCountChanged: {
+                var _modelDummy = []
+                for (var ix = 0; ix < modelCount; ix++) {
+                    _modelDummy.push(0);
+                }
+                modelDummy = _modelDummy;
+            }
+            model: modelDummy
             Layout.preferredWidth: width
-            Layout.preferredHeight: height
-            model: players
-            height: children[0].children.length ? Math.min(model.length, 4)*(spacing + children[0].children[0].height)-spacing : 0
+            width: parent.width
+            height: Math.min(model.length, 4)*(spacing + sHeight) - spacing
+            readonly property int sHeight: 50
             spacing: 20
             delegate: Item {
                 id: playerItem
                 width: playerList.width
-                height: 50
+                height: playerList.sHeight
                 property var pmodel: volumeRoot.players[model.index]
+                property var printf: volumeRoot.printf
                 PlasmaComponents.Label {
                     anchors {
                         top: parent.top
@@ -163,16 +165,13 @@ Lib.Card {
                         rightMargin: global.smallSpacing
                     }
                     value: position
+                    tooltipValue: printf((isPressed ? value*pmodel.length/100 : pmodel.position)/1000, "%N:%S/") + printf(pmodel.length/1000, "%N:%S")
                     onReleased: pmodel.seekTo(Math.round(value*pmodel.length/100));
                     onIconPressed: pmodel.raise();
                     icon: pmodel.icon
 
                     property int position: Math.round(100*pmodel.position/pmodel.length);
-                    onPositionChanged: {
-                        if (value != position) {
-                            value = position;
-                        }
-                    }
+                    onPositionChanged: if (value != position && !isPressed) value = position;
                 }
                 ToolButton {
                     id: prevBTN
@@ -204,7 +203,6 @@ Lib.Card {
                     icon.name: "media-skip-forward"
                     onClicked: pmodel.next()
                 }
-                Lib.Splitter {}
             }
         }
     ]
