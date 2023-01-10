@@ -19,7 +19,9 @@ Rectangle {
         readonly property var audio: Private.GlobalAudio{}
         readonly property var mpris2: Private.GlobalMPRIS2{}
         readonly property var palette: SystemPalette{colorGroup: SystemPalette.Active}
+        readonly property var mail: Private.GlobalMailProvider{}
     }
+    readonly property var prompt: Private.GlobalWindows{}
 
     // PROPERTIES
     property var scale: plasmoid.configuration.scale * PlasmaCore.Units.devicePixelRatio / 100

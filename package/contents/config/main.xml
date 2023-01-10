@@ -84,7 +84,7 @@
     </group>
     <group name="Widgets">
         <entry name="widgetOrder" type="string">
-            <default>battery,mpris,volume</default>
+            <default>quickbuttons,battery,kdeconnect,brightness,sessionbuttons</default>
         </entry>
     </group>
 </kcfg>

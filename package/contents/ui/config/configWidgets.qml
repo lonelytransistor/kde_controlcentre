@@ -40,9 +40,27 @@ Private.ComponentList {
         }
         ListElement {
             title: "KDE Connect"
-            description: "A widget control of KDE Connect compatible devices."
+            description: "A widget used to control KDE Connect compatible devices."
             icon: "kdeconnect"
             uuid: "kdeconnect"
+        }
+        ListElement {
+            title: "Session buttons"
+            description: "A widget containing basic session buttons."
+            icon: "system-shutdown"
+            uuid: "sessionbuttons"
+        }
+        ListElement {
+            title: "Quick buttons"
+            description: "A widget containing buttons like on Android."
+            icon: "quickopen"
+            uuid: "quickbuttons"
+        }
+        ListElement {
+            title: "ProtonMail client"
+            description: "A widget checking for e-mails on your ProtonMail account every 30 minutes."
+            icon: "mail-read"
+            uuid: "protonmail"
         }
     }
 }

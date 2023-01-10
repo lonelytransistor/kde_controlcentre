@@ -1,18 +1,8 @@
 import QtQuick 2.0
+import PythonLoader 1.0
 
 Item {
-    readonly property var getLoader: function(_it) {
-        var it = _it;
-        do {
-            if (it.toString().startsWith("RootLoader_QMLTYPE") && it.objectType === "RootLoader") {
-                console.log("Found!", it);
-                return it;
-            }
-            it = it.parent;
-        } while (it);
-        console.log("Not found!")
-        return null;
-    }
+    readonly property var python: PythonLoader{}
     readonly property var getIcon: Item {
         readonly property var network: function(networkStrength, networkType) {
             var prefixes = ["network-mobile-0", "network-mobile-20", "network-mobile-60", "network-mobile-80", "network-mobile-100"];

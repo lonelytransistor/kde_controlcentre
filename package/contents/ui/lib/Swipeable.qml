@@ -177,11 +177,8 @@ Item {
         color: root.colorCentre
         Button {
             id: icon
-            icon.name: root.iconCentre
-            icon.source: root.iconCentre
             icon.height: height
             icon.width: width
-            icon.color: "transparent"
             display: Button.IconOnly
             flat: true
             hoverEnabled: false
@@ -191,6 +188,11 @@ Item {
                 left: parent.left
                 verticalCenter: parent.verticalCenter
                 leftMargin: root.spacing
+            }
+            Image {
+                source: !!root.iconCentre ? root.iconCentre : ""
+                anchors.fill: parent
+                onStatusChanged: if (status==Image.Error && source) { source = ""; icon.icon.name = root.iconCentre }
             }
         }
         Text {
@@ -216,17 +218,33 @@ Item {
     }
     TouchArea {
         anchors.fill: parent
+        property bool accept: false
         onTouchPress: {
-            ev.accepted = true;
+            if (accept) {
+                accept = false;
+                ev.accepted = false;
+                console.log("rejected swipeable")
+            } else {
+                ev.accepted = true;
+            }
         }
         onTouchMove: {
-            let delta = ev.x - ev.startX;
-            if (delta > root.width) {
+            let deltaX = ev.x - ev.startX;
+            let deltaY = ev.y - ev.startY;
+            if (deltaX > root.width) {
                 bgCentre.x = root.width;
-            } else if (delta < -root.width) {
+            } else if (deltaX < -root.width) {
                 bgCentre.x = -root.width;
             } else {
-                bgCentre.x = delta;
+                bgCentre.x = deltaX;
+            }
+            if (!accept) {
+                if (Math.abs(deltaX) > root.threshold) {
+                    accept = true;
+                } else if (Math.abs(deltaY)>30 && Math.abs(deltaY)>Math.abs(deltaX)) {
+                    touchRelease(ev);
+                    ev.accepted = false;
+                }
             }
         }
         onTouchRelease: {
@@ -243,6 +261,7 @@ Item {
             } else {
                 bgCentre.state = "closed"
             }
+            accept = false;
         }
         onMousePress: {
             ev.accepted = true;

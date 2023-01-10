@@ -36,7 +36,7 @@ Lib.Card {
     Timer {
         running: plasmoid.expanded
         repeat: true
-        interval: 1000
+        interval: 750
         triggeredOnStart: true
         onTriggered: {
             if (volumeRoot.isExpanded) {
@@ -124,16 +124,7 @@ Lib.Card {
         },
         ListView {
             id: playerList
-            property var modelDummy: []
-            readonly property int modelCount: volumeRoot.players.length
-            onModelCountChanged: {
-                var _modelDummy = []
-                for (var ix = 0; ix < modelCount; ix++) {
-                    _modelDummy.push(0);
-                }
-                modelDummy = _modelDummy;
-            }
-            model: modelDummy
+            model: volumeRoot.players.length
             Layout.preferredWidth: width
             width: parent.width
             height: Math.min(model.length, 4)*(spacing + sHeight) - spacing

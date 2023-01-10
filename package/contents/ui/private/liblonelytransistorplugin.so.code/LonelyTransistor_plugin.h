@@ -4,6 +4,7 @@
 #include "StatisticsProvider.h"
 #include "SystemConfig.h"
 #include "TouchArea.h"
+#include "PythonLoader.h"
 
 class QLonelyTransistorPlugin : public QQmlEngineExtensionPlugin {
   Q_OBJECT
@@ -15,5 +16,6 @@ public:
     qmlRegisterType<TouchArea>("TouchArea", 1, 0, "TouchArea");
     qmlRegisterType<SystemConfig>("SystemConfig", 1, 0, "SystemConfig");
     qmlRegisterType<StatisticsProvider>("StatisticsProvider", 1, 0, "StatisticsProvider");
+    qmlRegisterType<PythonLoader>("PythonLoader", 1, 0, "PythonLoader");
   }
 };

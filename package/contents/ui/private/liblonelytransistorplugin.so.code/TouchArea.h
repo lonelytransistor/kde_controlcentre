@@ -1,7 +1,12 @@
 #pragma once
-#include <QtQuick>
+
+#include <QEvent>
 #include <QMouseEvent>
 #include <QTouchEvent>
+#include <QTouchDevice>
+#include <QQuickItem>
+#include <QQuickWindow>
+#include <QApplication>
 #include <algorithm>
 #include <list>
 #include "QQuickEvent.h"
@@ -24,15 +29,8 @@ signals:
   void touchRelease(QQuickEvent* ev);
 
 protected:
-  void mousePressEvent(QMouseEvent* event) final override;
-  void mouseMoveEvent(QMouseEvent* event) final override;
-  void mouseReleaseEvent(QMouseEvent* event) final override;
-  void touchEvent(QTouchEvent* event) final override;
+  bool event(QEvent* event) final override;
 
 private:
-  bool registerTouch(QTouchEvent::TouchPoint* event);
-  bool deregisterTouch(QTouchEvent::TouchPoint* event);
-  bool isAcceptedTouch(ulong timestamp);
-  std::list<int> touchPoints = {};
-  std::list<ulong> touchAccepted = {};
+  bool m_inhibit = false;
 };

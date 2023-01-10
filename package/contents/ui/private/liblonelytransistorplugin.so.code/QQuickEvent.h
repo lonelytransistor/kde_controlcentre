@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <QQuickItem>
 #include <QMouseEvent>
 #include <QTouchEvent>
 
@@ -17,6 +18,8 @@ class QQuickEvent: public QObject {
     Q_PROPERTY(int state READ state CONSTANT)
 
     Q_PROPERTY(bool accepted READ getAccepted WRITE setAccepted)
+    Q_PROPERTY(bool reemulate READ getReemulation WRITE setReemulation)
+    Q_PROPERTY(QQuickItem* reemulateObj READ getReemulationObj WRITE setReemulationObj)
 
 public:
     QQuickEvent(QMouseEvent* event) {
@@ -50,7 +53,11 @@ public:
     int state() const { return _state; }
 
     bool getAccepted() { return _accepted; }
+    bool getReemulation() { return _reemulate; }
+    QQuickItem* getReemulationObj() { return _reemulateObj; }
     void setAccepted(bool accepted) { _accepted = accepted; }
+    void setReemulation(bool reemulate) { _reemulate = reemulate; }
+    void setReemulationObj(QQuickItem* reemulateObj) { _reemulateObj = reemulateObj; }
 private:
     qreal _x = 0;
     qreal _y = 0;
@@ -63,4 +70,6 @@ private:
     int _state = 0;
 
     bool _accepted = false;
+    bool _reemulate = false;
+    QQuickItem* _reemulateObj;
 };

@@ -29,14 +29,20 @@ Item {
         property var mpris: Component{Components.MPRIS2{}}
         property var brightness: Component{Components.Brightness{}}
         property var kdeconnect: Component{Components.KDEConnect{}}
+        property var sessionbuttons: Component{Components.SessionButtons{}}
+        property var quickbuttons: Component{Components.QuickButtons{}}
+        property var protonmail: Component{Components.ProtonMail{}}
 
         delegate: Private.RootLoader {
             objectName: fullRep.config[model.index]
-            sourceComponent: objectName == "battery"    ? fullRep.battery :
-                             objectName == "volume"     ? fullRep.volume :
-                             objectName == "mpris"      ? fullRep.mpris :
-                             objectName == "brightness" ? fullRep.brightness :
-                             objectName == "kdeconnect" ? fullRep.kdeconnect : null
+            sourceComponent: objectName == "battery"        ? fullRep.battery :
+                             objectName == "volume"         ? fullRep.volume :
+                             objectName == "mpris"          ? fullRep.mpris :
+                             objectName == "brightness"     ? fullRep.brightness :
+                             objectName == "kdeconnect"     ? fullRep.kdeconnect :
+                             objectName == "sessionbuttons" ? fullRep.sessionbuttons :
+                             objectName == "quickbuttons"   ? fullRep.quickbuttons :
+                             objectName == "protonmail"     ? fullRep.protonmail : null
         }
         Component.onCompleted: dismissRoot.parent = (fullRep.children[0].objectName != "dismiss" ? fullRep.children[0] : fullRep)
         Private.DismissArea{id:dismissRoot}

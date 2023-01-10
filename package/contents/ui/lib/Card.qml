@@ -300,7 +300,15 @@ Item {
                 id: smallRepresentation
                 spacing: global.smallSpacing
                 anchors {
-                    top: leftSubtitle!=""||rightSubtitle!="" ? leftSubtitleO.bottom : leftTitleO.bottom
+                    top: {
+                        if (leftSubtitle != "" || rightSubtitle != "") {
+                            return leftSubtitleO.bottom
+                        } else if (leftTitle != "" || rightTitle != "") {
+                            return leftTitleO.bottom
+                        } else {
+                            return parent.top
+                        }
+                    }
                     left: cardRootOffset.fraction==1 ? parent.right : parent.left
                     leftMargin: global.smallSpacing
                 }

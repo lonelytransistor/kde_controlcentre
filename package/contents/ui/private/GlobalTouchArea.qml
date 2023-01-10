@@ -10,6 +10,7 @@ TouchArea {
     property int activeTouches: 0
     property var activeArea: null
     property var areas: []
+    z: 1
     property var append: function(area) {
         areas.push(area);
     }
@@ -93,8 +94,16 @@ TouchArea {
     }
     onTouchMove: {
         if (activeArea != null) {
-            activeArea.touchMove(convertEventToLocal(ev));
             ev.accepted = true;
+            let ev2 = convertEventToLocal(ev);
+            activeArea.touchMove(ev2);
+            if (!ev2.accepted) {
+                touchRelease(ev);
+                ev.reemulate = true;
+                ev.accepted = false;
+                activeArea = null;
+                activeTouches = 0;
+            }
         } else {
             ev.accepted = false;
         }

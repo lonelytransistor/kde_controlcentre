@@ -19,6 +19,7 @@ Lib.Card {
 
             icon: global.misc.getIcon.brightness(normalized)
             value: bRoot.screen.value
+            tooltipValue: normalized + "%"
             from: bRoot.screen.min
             to: bRoot.screen.max
             step: 1
@@ -31,6 +32,7 @@ Lib.Card {
 
             icon: global.misc.getIcon.brightness(normalized)
             value: bRoot.screen.value
+            tooltipValue: normalized + "%"
             from: bRoot.screen.min
             to: bRoot.screen.max
             step: 1
@@ -43,6 +45,7 @@ Lib.Card {
 
             icon: global.misc.getIcon.brightness(normalized)
             value: bRoot.keyboard.value
+            tooltipValue: normalized + "%"
             from: bRoot.keyboard.min
             to: bRoot.keyboard.max
             step: 1

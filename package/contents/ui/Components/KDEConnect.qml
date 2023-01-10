@@ -22,11 +22,7 @@ Repeater {
         readonly property variant share: ShareDbusInterfaceFactory.create(model.deviceId)
         property bool dropping: false
 
-        onEntered: {
-            if (drag.hasUrls) {
-                dropping = true
-            }
-        }
+        onEntered: if (drag.hasUrls) dropping = true
         onExited: dropping = false
         onDropped: {
             dropping = false
@@ -62,12 +58,13 @@ Repeater {
 
             visible: !fileDropArea.dropping
 
-            readonly property QtObject device:     DeviceDbusInterfaceFactory.create(model.deviceId)
-            readonly property variant battery:     DeviceBatteryDbusInterfaceFactory.create(model.deviceId)
-            readonly property variant network:     DeviceConnectivityReportDbusInterfaceFactory.create(model.deviceId)
-            readonly property variant findMyPhone: FindMyPhoneDbusInterfaceFactory.create(model.deviceId)
-            readonly property variant sftp:        SftpDbusInterfaceFactory.create(model.deviceId)
-            readonly property var icon:            global.misc.getIcon
+            readonly property QtObject device:       DeviceDbusInterfaceFactory.create(model.deviceId)
+            readonly property variant battery:       DeviceBatteryDbusInterfaceFactory.create(model.deviceId)
+            readonly property variant network:       DeviceConnectivityReportDbusInterfaceFactory.create(model.deviceId)
+            readonly property variant findMyPhone:   FindMyPhoneDbusInterfaceFactory.create(model.deviceId)
+            readonly property variant sftp:          SftpDbusInterfaceFactory.create(model.deviceId)
+            readonly property variant notifications: NotificationsModel{deviceId: model.deviceId}
+            readonly property var icon:              global.misc.getIcon
 
             leftTitle: model.name
             rightTitle: (battery.isCharging ? "🗲 " : "") + battery.charge + "%"
@@ -75,25 +72,17 @@ Repeater {
             buttons: [{
                 "icon": "document-open-folder",
                 "tooltip": "Browse this device",
-                "onClicked": function() {
-                    sftp.startBrowsing();
-                }}, {
+                "onClicked": sftp.startBrowsing
+            }, {
                 "icon": "irc-voice",
                 "tooltip": "Ring this device",
-                "onClicked": function() {
-                    findMyPhone.ring();
-                }}, {
+                "onClicked": findMyPhone.ring
+            }, {
                 "icon": "edit-clear-history",
                 "tooltip": "Clear all notifications",
-                "onClicked": function() {
-                    notificationsView.model.dismissAll();
-                }}
-            ]
+                "onClicked": notifications.dismissAll
+            }]
 
-            NotificationsModel {
-                id: notificationsModel
-                deviceId: model.deviceId
-            }
             small: [
                 Row {
                     Layout.alignment: Qt.AlignRight
@@ -110,63 +99,15 @@ Repeater {
                         source: kdeRoot.network ? kdeRoot.icon.network(kdeRoot.network.cellularNetworkStrength, kdeRoot.network.cellularNetworkType) : kdeRoot.icon.network(-1, "");
                     }
                 },
-                ListView {
-                    id: notificationsView
-                    model: notificationsModel
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: width
-                    Layout.preferredHeight: height
-                    height: (children[0].children.length ? Math.min(model.count, 3)*(children[0].children[0].height + spacing) : 0) - spacing
-                    width: parent.width
-                    spacing: global.smallSpacing
-                    interactive: false
-                    clip: true
-                    delegate: Lib.Swipeable {
-                        id: notificationItem
-                        width: notificationsView.width
-                        height: 0.7*global.sectionHeight/3 - notificationsView.spacing
+                Lib.SwipeableListView {
+                    model: kdeRoot.notifications
 
-                        border.color: "#FFFFFF"
-                        border.width: 1
-                        borderOpacity: 0.1
-
-                        textCentre: appName + ": " + (title.length>0 ? (appName==title?notitext:title+": "+notitext) : name)
-                        iconCentre: appIcon
-                        textCentreColor: textCentreColor
-
-                        textRight: "Delete"
-                        textRightColor: "white"
-                        colorRight: "tomato"
-                        iconRight: "emblem-error"
-
-                        textLeft: "Reply"
-                        textLeftColor: "black"
-                        colorLeft: "#30f030"
-                        iconLeft: "emblem-checked"
-
-                        onOpenLeft: dbusInterface.reply()
-                        onOpenRight: dbusInterface.dismiss()
-
-                        ListView.onRemove: SequentialAnimation {
-                            PropertyAction {
-                                target: notificationItem
-                                property: "ListView.delayRemove"
-                                value: true
-                            }
-                            NumberAnimation {
-                                target: notificationItem
-                                property: "height"
-                                to: 0
-                                easing.type: Easing.InOutQuad
-                            }
-                            PropertyAction {
-                                target: notificationItem
-                                property: "ListView.delayRemove"
-                                value: false
-                            }
-                        }
-                    }
+                    textCentre: m => m.appName + ": " + (m.title.length>0 ? (m.appName==m.title ? m.notitext : m.title+": "+m.notitext) : m.name)
+                    iconCentre: m => m.appIcon
+                    textRight: m => "Delete"
+                    textLeft: m => "Reply"
+                    onOpenLeft: m.dbusInterface.reply()
+                    onOpenRight: m.dbusInterface.dismiss()
                 }
             ]
             big: []
