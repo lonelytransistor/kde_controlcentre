@@ -83,6 +83,7 @@ Item {
                 property int bigOffset: -cardRootOffset.bigOffset
                 property bool expanded: plasmoid.expanded;
                 enabled: bigRepresentation.height > smallRepresentation.height
+                z: cardRootOffset.state=="collapsed" ? 0 : 2;
 
                 function updateOffset() {
                     if (cardRootOffset.state == "collapsed") {
@@ -270,11 +271,11 @@ Item {
                         property string buttonTooltip: cardRoot.buttons[index].tooltip
 
                         visible: buttonIcon != ""
-                        Image {
-                            source: buttonIcon
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            onStatusChanged: if (status==Image.Error && source) { source = ""; parent.icon.name = parent.buttonIcon }
+                        Icon {
+                            anchors.centerIn: parent
+                            size: parent.height-8
+                            source: parent.buttonIcon
+                            onPressed: parent.clicked()
                         }
                         ToolTip.delay: 500
                         ToolTip.text: buttonTooltip

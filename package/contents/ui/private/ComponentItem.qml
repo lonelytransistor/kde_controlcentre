@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtGraphicalEffects 1.15
 
 Item {
     id: root
@@ -8,27 +7,15 @@ Item {
     property var modelData
     readonly property var info: modelData ? modelData : {"icon": "", "title": "", "description": "", "splitter": false}
 
-    Button {
+    Icon {
         id: icon
         anchors {
-            bottom: parent.bottom
-            left: parent.left
             top: parent.top
+            left: parent.left
         }
-        width: height
-        flat: true
-        icon.name: info.icon
-        icon.source: info.icon
-        icon.height: parent.height
-        icon.width: parent.height
-    }
-    Glow {
-        id: iconShadow
-        anchors.fill: icon
-        radius: 5
-        samples: 10
-        color: "black"
-        source: icon
+        size: parent.height
+        source: info.icon
+        glow: true
     }
     Text {
         id: title

@@ -43,22 +43,31 @@ Lib.Card {
         Lib.Label {
             text: {
                 if (inhibitions.list.length == 0) {
-                    return ""
+                    return "";
                 } else if (inhibitions.list.length == 1) {
                     var name = inhibitions.list[0]["Name"];
                     var icon = inhibitions.list[0]["Icon"];
-                    return (icon ? "|icon:" + icon + "|" : name) + " blocks sleep."
+                    return "|icon:" + icon + ":" + name + "| blocks sleep."
                 } else {
-                    let text = ""
+                    let text = "";
+                    let icons = 0;
+                    for (let ix in inhibitions.list) {
+                        var icon = inhibitions.list[ix]["Icon"];
+                        if (icon) {
+                            text += "|icon:" + icon + ":, " + icon + "|";
+                            icons++;
+                        }
+                    }
                     for (let ix in inhibitions.list) {
                         var name = inhibitions.list[ix]["Name"];
                         var icon = inhibitions.list[ix]["Icon"];
-                        if (ix != 0)
-                            text += ", "
-                        text += (icon ? "|icon:" + icon + "|" : name)
+                        if (icons && !icon && name) {
+                            text += ", ";
+                            text += name;
+                        }
                     }
-                    text += " block sleep."
-                    return text
+                    text += " block sleep.";
+                    return text;
                 }
             }
         }

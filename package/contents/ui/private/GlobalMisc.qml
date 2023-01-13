@@ -1,8 +1,74 @@
 import QtQuick 2.0
 import PythonLoader 1.0
+import Utilities 1.0
 
 Item {
-    readonly property var python: PythonLoader{}
+    Utilities{id: utilsInternal}
+
+    readonly property var python: Item {
+        PythonLoader {
+            id: pyInternal
+            property bool initialized: false
+        }
+
+        function initPython() {
+            if (!pyInternal.initialized) {
+                var newCwd = Qt.resolvedUrl(".").substring(7);
+                pyInternal.initialized = pyInternal.switchCwd(newCwd);
+
+                if (pyInternal.initialized) {
+                    console.log("Python initialization succeeded!", newCwd);
+                } else {
+                    console.log("Python initialization failed! CWD =", newCwd);
+                }
+            }
+        }
+        readonly property var call: function(mod, func, args=[]) {
+            initPython();
+            return pyInternal.call(mod, func, args);
+        }
+        readonly property var get: function(mod, name) {
+            initPython();
+            if (arguments.length == 1) {
+                return pyInternal.get("__main__", mod);
+            } else {
+                return pyInternal.get(mod, name);
+            }
+        }
+        readonly property var set: function(mod, name, val) {
+            initPython();
+            if (arguments.length == 1) {
+                return pyInternal.set("__main__", mod, val);
+            } else {
+                return pyInternal.set(mod, name, val);
+            }
+        }
+        readonly property var importModule: function(mod) {
+            initPython();
+            return pyInternal.importModule(mod);
+        }
+    }
+    readonly property var getImageType: utilsInternal.getImageType;
+    readonly property var getImageAverageColor: function(item, cb) {
+        if (item.width > 0 && item.height > 0 && item.parent) {
+            item.grabToImage(result => cb(utilsInternal.getAverageColor(result)));
+        }
+    }
+    readonly property var dBus: Item {
+        readonly property var call: function(service, path, iface, method, args, convert="") {
+            return utilsInternal.dbusCall(service, path, iface, method, args, convert);
+        }
+        readonly property var get: function(service, path, iface, name) {
+            return utilsInternal.dbusGet(service, path, iface, name);
+        }
+    }
+    readonly property var getInvertedColor: function(color) {
+        if (color) {
+            return Qt.rgba(255-color.r, 255-color.g, 255-color.b, color.a);
+        } else {
+            return Qt.rgba(0,0,0,0);
+        }
+    }
     readonly property var getIcon: Item {
         readonly property var network: function(networkStrength, networkType) {
             var prefixes = ["network-mobile-0", "network-mobile-20", "network-mobile-60", "network-mobile-80", "network-mobile-100"];

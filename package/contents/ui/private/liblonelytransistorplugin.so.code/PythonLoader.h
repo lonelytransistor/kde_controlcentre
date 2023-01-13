@@ -5,10 +5,13 @@
 #include <QVariant>
 #include <QByteArray>
 #include <QStringList>
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QMap>
 #include <string>
 #include <QDebug>
 #include <dlfcn.h>
+#include "LonelyTransistorBase.h"
 
 #pragma push_macro("slots")
 #undef slots
@@ -21,8 +24,46 @@ toPyObject(type v) {\
   stackPush(ret);\
   return ret;\
 }
+#define py_newobj(name, value) \
+  PyObject* name = value; \
+  if (name == NULL) {\
+    if (PyErr_Occurred()) {\
+      PyErr_PrintEx(0);\
+      PyErr_Clear();\
+    }\
+    stackFree();\
+    return QVariant();\
+  } else {\
+    stackPush(name);\
+  }
 
-class PythonLoader : public QObject
+class PythonLoaderPyObject : public QObject
+{
+  Q_OBJECT
+
+public:
+  PythonLoaderPyObject() {
+  }
+  PythonLoaderPyObject(PyObject* obj) : QObject(nullptr) {
+    m_obj = obj;
+  }
+  PythonLoaderPyObject(const PythonLoaderPyObject& obj) : QObject(nullptr) {
+    m_obj = obj.m_obj;
+  }
+  PythonLoaderPyObject &operator=(const PythonLoaderPyObject& obj) {
+    m_obj = obj.m_obj;
+    return *this;
+  }
+
+  PyObject* getPyObject() {
+    return m_obj;
+  }
+private:
+  PyObject* m_obj = NULL;
+};
+Q_DECLARE_METATYPE(PythonLoaderPyObject);
+
+class PythonLoader : public QObject, public LonelyTransistorBase
 {
   Q_OBJECT
 
@@ -31,13 +72,18 @@ public:
   ~PythonLoader();
 
 public Q_SLOTS:
-  bool importModule(QUrl url);
+  bool switchCwd(QUrl cwd);
+
+  void rawCall(QString script);
+  QVariant importModule(QString url);
+  QVariant importModule(QUrl url);
+  QVariant getModule(QString mod);
+
   QVariant call(QString mod, QString fn, QVariantList params);
-  void printError() {PyErr_Print();};
+  QVariant get(QVariant obj, QString var);
+  bool set(QVariant obj, QString var, QVariant val);
 
 private:
-  void* m_libPython;
-
   QStringList m_importPaths;
   QMap<QString, PyObject*> m_modules;
   QMap<QString, PyObject*> m_moduleDicts;
@@ -82,6 +128,8 @@ private:
         return toPyObject(v.value<QVariantList>());
       case QVariant::Map:
         return toPyObject(v.value<QVariantMap>());
+      case QVariant::UserType:
+        return qvariant_cast<PythonLoaderPyObject>(v).getPyObject();
       default:
         return Py_None;
     }
@@ -116,8 +164,12 @@ private:
       return QVariant(PyLong_AsUnsignedLongLong(v));
     } else if (PyBool_Check(v)) {
       return QVariant(v == Py_True);
-    } else {
+    } else if (v == Py_None) {
       return QVariant();
+    } else {
+      QVariant ret;
+      ret.setValue(PythonLoaderPyObject(v));
+      return ret;
     }
   }
 };

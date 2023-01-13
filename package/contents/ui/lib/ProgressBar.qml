@@ -15,19 +15,15 @@ Item {
 
     signal iconPressed
 
-    height: icon.height
+    height: icon.size
     width: parent.width
     Layout.fillHeight: true
     Layout.fillWidth: true
 
-    PlasmaCore.IconItem {
+    Icon {
         id: icon
-        height: global.largeFontSize*2
-        width: height
-        MouseArea {
-            anchors.fill: parent
-            onPressed: progressBarRoot.iconPressed();
-        }
+        size: global.largeFontSize*2
+        onPressed: progressBarRoot.iconPressed();
     }
     PlasmaComponents.Slider {
         id: control

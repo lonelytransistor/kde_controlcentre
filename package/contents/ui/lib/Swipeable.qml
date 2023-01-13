@@ -4,8 +4,8 @@ import QtQuick.Controls 2.15
 Item {
     id: root
     anchors {
-        left: parent.left
-        right: parent.right
+        left: parent ? parent.left : undefined
+        right: parent ? parent.right : undefined
     }
     height: 50
 
@@ -57,23 +57,10 @@ Item {
             maximumLineCount: 1
             wrapMode: Text.WordWrap
         }
-        Button {
+        Icon {
             id: iconLeft
-            icon.name: root.iconLeft
-            icon.source: root.iconLeft
-            icon.height: height
-            icon.width: width
-            icon.color: "transparent"
-            display: Button.IconOnly
-            flat: true
-            hoverEnabled: false
-            height: parent.height*0.8
-            width: height
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: root.spacing
-            }
+            size: parent.height*0.8
+            source: root.iconLeft
         }
     }
     Rectangle {
@@ -85,23 +72,10 @@ Item {
             left: bgCentre.right
         }
         color: root.colorRight
-        Button {
+        Icon {
             id: iconRight
-            icon.name: root.iconRight
-            icon.source: root.iconRight
-            icon.height: height
-            icon.width: width
-            icon.color: "transparent"
-            display: Button.IconOnly
-            flat: true
-            hoverEnabled: false
-            height: parent.height*0.8
-            width: height
-            anchors {
-                left: parent.left
-                verticalCenter: parent.verticalCenter
-                leftMargin: root.spacing
-            }
+            size: parent.height*0.8
+            source: root.iconRight
         }
         Text {
             id: textRight
@@ -175,25 +149,10 @@ Item {
         ]
         x: 0
         color: root.colorCentre
-        Button {
-            id: icon
-            icon.height: height
-            icon.width: width
-            display: Button.IconOnly
-            flat: true
-            hoverEnabled: false
-            height: parent.height*0.8
-            width: height
-            anchors {
-                left: parent.left
-                verticalCenter: parent.verticalCenter
-                leftMargin: root.spacing
-            }
-            Image {
-                source: !!root.iconCentre ? root.iconCentre : ""
-                anchors.fill: parent
-                onStatusChanged: if (status==Image.Error && source) { source = ""; icon.icon.name = root.iconCentre }
-            }
+        Icon {
+            id: iconCentre
+            size: parent.height*0.8
+            source: root.iconCentre
         }
         Text {
             id: text
@@ -201,7 +160,7 @@ Item {
             color: root.textCentreColor
             anchors {
                 right: parent.right
-                left: icon.right
+                left: iconCentre.right
                 verticalCenter: parent.verticalCenter
                 leftMargin: root.spacing
             }

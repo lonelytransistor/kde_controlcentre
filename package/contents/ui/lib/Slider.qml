@@ -40,18 +40,14 @@ Item {
         font.capitalization: Font.Capitalize
         visible: text!=""
     }
-    PlasmaCore.IconItem {
+    Icon {
         id: icon
         anchors {
             left: parent.left
             verticalCenter: control.verticalCenter
         }
-        height: global.largeFontSize*2
-        width: height
-        MouseArea {
-            anchors.fill: parent
-            onPressed: sliderRoot.iconPressed();
-        }
+        size: global.largeFontSize*2
+        onPressed: sliderRoot.iconPressed();
     }
     PlasmaComponents.Slider {
         id: control

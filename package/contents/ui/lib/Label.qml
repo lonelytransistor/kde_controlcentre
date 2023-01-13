@@ -13,23 +13,28 @@ Row {
     property var weight: Font.Bold
 
     function split(str) {
-        var list = str.split(/\|(icon:.*?)\|/gm).filter(n => n);
+        var list = str.split(/\|(icon:.*?:.*?)\|/gm).filter(n => n);
         var model = [];
         for (var ix = 0; ix < list.length; ix++) {
-            var _text = ""; var _icon = "";
+            var _text = ""; var _icon = ""; var _alttext = "";
 
             if (list[ix].substring(0, 5) == "icon:") {
-                _icon = list[ix].substring(5);
+                var _tmp = list[ix].split(":");
+                _icon = _tmp[1];
+                _alttext = _tmp[2];
             } else {
                 _text = list[ix];
             }
-            if (list[ix+1] && list[ix+1].substring(0, 5) == "icon:") {
-                _icon = list[ix+1].substring(5);
+            if (!_icon && _text && list[ix+1] && list[ix+1].substring(0, 5) == "icon:") {
                 ix++;
+                var _tmp = list[ix].split(":");
+                _icon = _tmp[1];
+                _alttext = _tmp[2];
             }
             model.push({
                 "text": _text,
-                "icon": _icon
+                "icon": _icon,
+                "alttext": _alttext
             })
         }
         return model;
@@ -49,6 +54,7 @@ Row {
 
             property string text: repeater.model[model.index].text
             property string icon: repeater.model[model.index].icon
+            property string alttext: repeater.model[model.index].alttext
 
             PlasmaComponents.Label {
                 id: text
@@ -72,10 +78,9 @@ Row {
                     if (!valid && source && source.substring(source.length-8, source.length) != "-desktop") {
                         source += "-desktop"
                     } else if (!valid && source) {
-                        text.text += " " + src;
+                        text.text += " " + alttext;
                     }
                 }
-                property string src: parent.icon
                 source: parent.icon
             }
         }

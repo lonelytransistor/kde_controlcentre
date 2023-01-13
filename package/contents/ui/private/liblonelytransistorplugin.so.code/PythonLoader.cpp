@@ -1,13 +1,13 @@
 #include "PythonLoader.h"
 
+const void* m_libPython = dlopen("libpython3.so", RTLD_NOW | RTLD_GLOBAL);
+
 PythonLoader::PythonLoader() {
-  m_libPython = dlopen("libpython3.10.so", RTLD_NOW | RTLD_GLOBAL);
   Py_Initialize();
-  PyRun_SimpleString("import sys");
+  PyRun_SimpleString("import os, sys, __main__");
 }
 PythonLoader::~PythonLoader() {
   Py_Finalize();
-  dlclose(m_libPython);
 }
 
 PyObject* PythonLoader::toPyObject(QVariantList v) {
@@ -50,19 +50,10 @@ void PythonLoader::stackFree() {
   }
 }
 
-#define py_newobj(name, value) \
-  PyObject* name = value; \
-  if (name == NULL) {\
-    if (PyErr_Occurred()) {\
-      PyErr_PrintEx(0);\
-      PyErr_Clear();\
-    }\
-    stackFree();\
-    return false;\
-  } else {\
-    stackPush(name);\
-  }
-bool PythonLoader::importModule(QUrl url) {
+QVariant PythonLoader::importModule(QString url) {
+  return importModule(QUrl(url));
+}
+QVariant PythonLoader::importModule(QUrl url) {
   stackSet();
 
   QString path = url.adjusted(QUrl::RemoveFilename).path();
@@ -74,40 +65,106 @@ bool PythonLoader::importModule(QUrl url) {
     PyRun_SimpleString(("sys.path.append('"+path+"')").toStdString().c_str());
   }
 
-  py_newobj(pModule, PyImport_ImportModule(mod.toStdString().c_str()));
-  py_newobj(pDict, PyModule_GetDict(pModule));
+  py_newobj(pyMod, PyImport_ImportModule(mod.toStdString().c_str()));
+  py_newobj(pyDict, PyModule_GetDict(pyMod));
 
-  m_modules[mod] = pModule;
-  m_moduleDicts[mod] = pDict;
-  return true;
+  m_modules[mod] = pyMod;
+  m_moduleDicts[mod] = pyDict;
+  return QVariant(fromPyObject(m_modules[mod]));
 }
 
-#undef py_newobj
-#define py_newobj(name, value) \
-  PyObject* name = value; \
-  if (name == NULL) {\
-    if (PyErr_Occurred()) {\
-      PyErr_PrintEx(0);\
-      PyErr_Clear();\
-    }\
-    stackFree();\
-    return QVariant();\
-  } else {\
-    stackPush(name);\
-  }
 QVariant PythonLoader::call(QString mod, QString fn, QVariantList params) {
+  QVariant ret;
+  PyObject* pyDict = m_moduleDicts[mod];
+  if (pyDict == NULL) {
+    stackSet();
+    PyObject* pyMod = PyImport_GetModule(toPyObject(mod.toStdString().c_str()));
+    stackFree();
+
+    py_newobj(pyDict2, PyModule_GetDict(pyMod));
+    pyDict = pyDict2;
+    m_modules[mod] = pyMod;
+    m_moduleDicts[mod] = pyDict;
+  }
   stackSet();
 
-  py_newobj(pArgs, PyList_AsTuple(toPyObject(params)));
-  PyObject* pFunc = PyDict_GetItemString(m_moduleDicts[mod], fn.toStdString().c_str()); // This function only borrows an object!
-  if (PyCallable_Check(pFunc)) {
-    py_newobj(pRet, PyObject_CallObject(pFunc, pArgs));
-    QVariant ret = fromPyObject(pRet);
-
-    stackFree();
+  const char* pyVar = fn.toStdString().c_str();
+  if (pyDict == NULL) {
     return ret;
+  }
+  PyObject* pyFunc = PyDict_GetItemString(pyDict, pyVar); // This function only borrows an object!
+
+  py_newobj(pyArgs, PyList_AsTuple(toPyObject(params)));
+  if (PyCallable_Check(pyFunc)) {
+    py_newobj(pyRet, PyObject_CallObject(pyFunc, pyArgs));
+    ret = fromPyObject(pyRet);
   }
 
   stackFree();
-  return QVariant();
+  return ret;
+}
+bool PythonLoader::switchCwd(QUrl cwd) {
+  QVariantList params;
+  params.push_back(QVariant(cwd.path()));
+
+  call("os", "chdir", params);
+  params.clear();
+
+  QString newCwd = QUrl(call("os", "getcwd", params).toString()).path(QUrl::FullyEncoded | QUrl::StripTrailingSlash | QUrl::PreferLocalFile | QUrl::NormalizePathSegments);
+  QString reqCwd = QUrl(cwd.toString()).path(QUrl::FullyEncoded | QUrl::StripTrailingSlash | QUrl::PreferLocalFile | QUrl::NormalizePathSegments);
+  return newCwd == reqCwd;
+}
+
+void PythonLoader::rawCall(QString script) {
+  PyRun_SimpleString(script.toStdString().c_str());
+
+  if (PyErr_Occurred()) {
+    PyErr_PrintEx(0);
+    PyErr_Clear();
+  }
+}
+QVariant PythonLoader::get(QVariant obj, QString var) {
+  stackSet();
+
+  PyObject* pyObj = toPyObject(obj);
+  const char* pyVar = var.toStdString().c_str();
+  QVariant ret;
+  if (pyObj != NULL) {
+    ret = fromPyObject(PyObject_GetAttrString(pyObj, pyVar));
+
+    if (PyErr_Occurred()) {
+      PyErr_PrintEx(0);
+      PyErr_Clear();
+    }
+  }
+
+  stackFree();
+  return ret;
+}
+QVariant PythonLoader::getModule(QString mod) {
+  stackSet();
+
+  QVariant ret = fromPyObject(m_modules[mod]);
+
+  stackFree();
+  return ret;
+}
+bool PythonLoader::set(QVariant obj, QString var, QVariant val) {
+  stackSet();
+  bool ret = false;
+
+  PyObject* pyObj = toPyObject(obj);
+  PyObject* pyVal = toPyObject(val);
+  const char* pyVar = var.toStdString().c_str();
+  if (pyObj != NULL && pyVal != NULL && PyObject_HasAttrString(pyObj, pyVar)) {
+    ret = PyObject_SetAttrString(pyObj, pyVar, pyVal)==0;
+
+    if (PyErr_Occurred()) {
+      PyErr_PrintEx(0);
+      PyErr_Clear();
+    }
+  }
+
+  stackFree();
+  return ret;
 }

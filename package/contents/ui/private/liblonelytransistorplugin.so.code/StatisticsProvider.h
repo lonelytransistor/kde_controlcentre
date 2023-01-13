@@ -5,6 +5,7 @@
 #include <QVariantList>
 #include <QPointF>
 #include <QQmlParserStatus>
+#include "LonelyTransistorBase.h"
 
 struct HistoryReply {
 public:
@@ -15,7 +16,7 @@ public:
 
 Q_DECLARE_METATYPE(HistoryReply)
 
-class StatisticsProvider : public QObject, public QQmlParserStatus
+class StatisticsProvider : public QObject, public QQmlParserStatus, public LonelyTransistorBase
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)

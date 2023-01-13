@@ -13,18 +13,12 @@ Lib.Card {
 
     leftTitle: "ProtonMail"
     rightTitle: mail.unread.length>1 ? (mail.unread.length + " unread e-mails.") : (mail.unread.length==1 ? "1 unread e-mail." : "No unread e-mails.")
-    visible: mail.unread.length>0
-
-    buttons: [{
-        "icon": "view-refresh",
-        "tooltip": "Update",
-        "onClicked": mail.update
-    }]
+    //visible: mail.unread.length>0
 
     Timer {
         id: updateTimer
         interval: 30*60*1000
-        onTriggered: mail.update()
+        onTriggered: mail.update();
         triggeredOnStart: true
         running: true
     }
@@ -32,12 +26,16 @@ Lib.Card {
         Lib.SwipeableListView {
             jsonModel: protonRoot.mail.unread
 
+            canRefresh: true
+            onRefresh: protonRoot.mail.update()
+            onJsonModelChanged: refreshed()
+
             textCentre: m => m.senders[0] + ": " + m.subject
             iconCentre: m => m.icon
             textRight: m => "Archive"
             textLeft: m => "Read"
-            onOpenLeft: m.read()
-            onOpenRight: m.archive()
+            onOpenLeft: m.cmds.read()
+            onOpenRight: m.cmds.archive()
         }
     ]
     big: []

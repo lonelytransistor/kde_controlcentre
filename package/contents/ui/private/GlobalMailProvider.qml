@@ -2,14 +2,16 @@ import QtQuick 2.0
 
 Item {
     readonly property var protonMail: Item {
-        Component.onCompleted: global.misc.python.importModule("./protonmail")
+        readonly property var python: global.misc.python
 
         property var unread: []
-        readonly property int _DUMMY: 0b1000
-        readonly property int _NEEDS_REAUTH: 0b0010
+        readonly property var _module: python.importModule("./protonmail")
+        readonly property var _mainClass: python.get(_module, "main")
+        readonly property int _DUMMY: python.get(_mainClass, "DUMMY")
+        readonly property int _NEEDS_REAUTH: python.get(_mainClass, "NEEDS_REAUTH")
         readonly property var reauthenticate: function() {
             global.prompt.login("protonmail.svg", "Type in your ProtonMail credentials.", function(finish, errors, login, password) {
-                var ret = global.misc.python.call("protonmail", "setCredentials", [login, password]);
+                var ret = python.call("protonmail", "setCredentials", [login, password]);
                 if (ret == 0) {
                     finish("Logged in successfully.");
                 } else {
@@ -18,18 +20,21 @@ Item {
             }, function(){unread=[]});
         }
         readonly property var update: function() {
-            var _mails = global.misc.python.call("protonmail", "newMails", []);
-            global.misc.python.printError();
-            var status = global.misc.python.call("protonmail", "status", []);
-            global.misc.python.printError();
+            var _mails = python.call("protonmail", "newMails");
+            var status = python.call("protonmail", "status");
             if (status & _NEEDS_REAUTH) {
                 reauthenticate();
             } else if (status == 0) {
                 var ret = [];
                 for (var x of _mails) {
                     var it = x;
-                    it["read"] = () => global.misc.python.call("protonmail", "read", [this.ID, true]);
-                    it["archive"] = () => global.misc.python.call("protonmail", "archive", [this.ID, true]);
+                    var uid = it["ID"];
+                    it["cmds"] = {
+                       "uid": uid,
+                       "read": function() {python.call("protonmail","read",[this.uid, true]); this.update();},
+                       "archive": function() {python.call("protonmail","archive",[this.uid, true]); this.update();},
+                       "update": global.sources.mail.protonMail.update
+                    }
                     ret.push(it);
                 }
                 unread = ret;

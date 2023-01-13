@@ -11,10 +11,11 @@
 #include <QDBusReply>
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
+#include "LonelyTransistorBase.h"
 
 // powermanagementprofilesrc
 
-class SystemConfig : public QObject
+class SystemConfig : public QObject, public LonelyTransistorBase
 {
     Q_OBJECT
 

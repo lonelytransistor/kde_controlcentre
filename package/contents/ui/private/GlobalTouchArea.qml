@@ -98,7 +98,6 @@ TouchArea {
             let ev2 = convertEventToLocal(ev);
             activeArea.touchMove(ev2);
             if (!ev2.accepted) {
-                touchRelease(ev);
                 ev.reemulate = true;
                 ev.accepted = false;
                 activeArea = null;

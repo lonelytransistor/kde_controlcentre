@@ -7,11 +7,11 @@ TEMPLATE = lib
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += TouchArea.cpp StatisticsProvider.cpp SystemConfig.cpp PythonLoader.cpp
-HEADERS += TouchArea.h StatisticsProvider.h SystemConfig.h PythonLoader.h
+SOURCES += LonelyTransistorBase.cpp TouchArea.cpp StatisticsProvider.cpp SystemConfig.cpp PythonLoader.cpp Utilities.cpp
+HEADERS += LonelyTransistorBase.h TouchArea.h StatisticsProvider.h SystemConfig.h PythonLoader.h Utilities.h
 HEADERS += QQuickEvent.h LonelyTransistor_plugin.h
 
-LIBS += -lpython3.10 -lcrypt -ldl -lm -Xlinker -export-dynamic
+LIBS += -lpython3 -lcrypt -ldl -lm
 INCLUDEPATH += /usr/include/python3.10/
 DEPENDPATH += /usr/include/python3.10/
 

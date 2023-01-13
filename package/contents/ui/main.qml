@@ -11,6 +11,29 @@ Rectangle {
     id: global
     
     //clip: true
+    Item {
+        Component.onCompleted: {
+            Math.clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+            Math.bigger = (num, ...args) => {
+                var ret = -Infinity;
+                for (const arg of args) {
+                    if (arg <= num) {
+                        ret = Math.max(ret, arg);
+                    }
+                }
+                return ret==-Infinity ? num : ret;
+            }
+            Math.smaller = (num, ...args) => {
+                var ret = Infinity;
+                for (const arg of args) {
+                    if (arg >= num) {
+                        ret = Math.min(ret, arg);
+                    }
+                }
+                return ret==Infinity ? num : ret;
+            }
+        }
+    }
 
     readonly property var cards: Private.GlobalCards{}
     readonly property var misc: Private.GlobalMisc{}
@@ -20,6 +43,7 @@ Rectangle {
         readonly property var mpris2: Private.GlobalMPRIS2{}
         readonly property var palette: SystemPalette{colorGroup: SystemPalette.Active}
         readonly property var mail: Private.GlobalMailProvider{}
+        readonly property var notifications: Private.GlobalNotifications{}
     }
     readonly property var prompt: Private.GlobalWindows{}
 

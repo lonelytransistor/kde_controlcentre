@@ -5,6 +5,7 @@ from io import BytesIO
 import base64, pickle, os
 
 class Main:
+    DUMMY = 0b1000
     NEEDS_REAUTH = 0b0010
 
     LABEL_SPAM = "4"
@@ -62,8 +63,6 @@ class Main:
 
     def _handleError(self, e):
         if (e.code == 401):
-            #self.session.refresh()
-            #return True
             return self.login()
         elif (e.code == 403):
             return self.login()
@@ -77,7 +76,7 @@ class Main:
             return self.login()
         return False
 
-    def api_request(self, endpoint, **params):
+    def api_request(self, endpoint, method=None, jsondata=None, **params):
         if self.session == None:
             if self.login():
                 return True
@@ -85,8 +84,12 @@ class Main:
                 return False
         while True:
             try:
-                return self.session.api_request(endpoint, params=params)
+                if (params == {}):
+                    params = None
+                print(endpoint, params, jsondata)
+                return self.session.api_request(endpoint, method=method, jsondata=jsondata, params=params)
             except ProtonError as e:
+                print("EX!", e)
                 if not self._handleError(e):
                     return None
 
@@ -156,7 +159,8 @@ class Main:
     def unsetLabel(self, uid, label):
         return self.api_request("/mail/v4/conversations/unlabel", LabelID=label, IDs=[uid])
     def markRead(self, uid):
-        return self.api_request("/mail/v4/conversations/read", IDs=[uid])
+        print("Marking as read", uid)
+        return self.api_request("/mail/v4/conversations/read", "put", IDs=[uid])
     def markUnread(self, uid):
         return self.api_request("/mail/v4/conversations/unread", IDs=[uid], LabelID="0")
 
@@ -173,11 +177,11 @@ def setCredentials(login, password):
     return ping()
 def read(uid, t):
     if (t):
-        main.markRead(uid)
+        return main.markRead(uid)
     else:
-        main.markUnread(uid)
+        return main.markUnread(uid)
 def archive(uid, t):
     if (t):
-        main.moveFolder(uid, main.LABEL_ARCHIVE)
+        return main.moveFolder(uid, main.LABEL_ARCHIVE)
     else:
-        main.moveFolder(uid, main.LABEL_INBOX)
+        return main.moveFolder(uid, main.LABEL_INBOX)

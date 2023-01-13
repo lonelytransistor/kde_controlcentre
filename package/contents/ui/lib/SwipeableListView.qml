@@ -11,6 +11,34 @@ ListView {
     width: parent.width
     spacing: global.smallSpacing
 
+    property bool canRefresh: false
+    property bool refreshPossible: false
+    property double refreshHeight: 0
+    property double refreshing: 0.0
+    property double minYPosition: 0.0
+    property double yPosition: visibleArea.yPosition
+    onMovementStarted: {
+        minYPosition = 0.0;
+        refreshPossible = visibleArea.yPosition<=0 && canRefresh;
+        refreshHeight = visibleArea.heightRatio;
+    }
+    onYPositionChanged: {
+        minYPosition = Math.min(visibleArea.yPosition, minYPosition)
+        if (refreshPossible && -minYPosition>refreshHeight) {
+            interactive = false;
+            minYPosition = 0.0;
+            refreshPossible = false;
+            refreshing = 0.025;
+            refresh();
+        }
+    }
+    Timer {
+        id: refreshingTimer
+        running: root.refreshing > 0.0
+        interval: 10
+        onTriggered: root.refreshing += 0.025
+    }
+
     property var jsonModel: []
     model: jsonModel.length
 
@@ -32,10 +60,35 @@ ListView {
     property var textCentre: n => "centre"
     property var iconCentre: n => "battery"
 
+    signal refresh
+    signal refreshed
     signal openLeft(m: var)
     signal openRight(m: var)
 
     clip: true
+    Item {
+        id: refreshIndicator
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+        }
+        Item {
+            anchors.centerIn: parent
+            height: parent.height
+            width: height
+            RefreshIndicator {
+                borderColor: "#377292"
+                position: refreshIndicator.position
+            }
+        }
+        height: 30
+        property double positionMove: -Math.min((root.visibleArea.yPosition + (refreshIndicator.height/root.height)*root.refreshHeight)*6, 0)
+        property double positionTimer: 1.0 + root.refreshing
+        property double position: (root.refreshing > 0) ? positionTimer : positionMove
+        opacity: Math.min(1.0, position*3)
+        visible: root.refreshPossible || root.refreshing > 0
+    }
     Rectangle {
         anchors {
             left: parent.left

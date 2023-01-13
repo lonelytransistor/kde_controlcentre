@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.private.nightcolorcontrol 1.0 as Redshift
 
 import StatisticsProvider 1.0
 import SystemConfig 1.0
@@ -7,6 +8,84 @@ import SystemConfig 1.0
 Item {
     id: pmRoot
     SystemConfig { id: sysConf }
+    Redshift.Inhibitor {
+        id: redshiftInhibitor
+        property bool inhibited: false
+
+        Component.onCompleted: stateChanged()
+        onStateChanged: {
+            switch (redshiftInhibitor.state) {
+                case Redshift.Inhibitor.Inhibiting:
+                case Redshift.Inhibitor.Inhibited:
+                    inhibited = true;
+                    break;
+                case Redshift.Inhibitor.Uninhibiting:
+                case Redshift.Inhibitor.Uninhibited:
+                    inhibited = false;
+                    break;
+            }
+        }
+    }
+    Redshift.Monitor {
+        id: redshiftMonitor
+        property bool inhibited: redshiftInhibitor.inhibited
+        property bool previewing: false
+        property bool systemActive: false
+
+        property int scheduledTransition: 0
+        property int nightTemperature: {
+            var settingsVal = sysConf.readEntry("powermanagementprofilesrc", ["NightColor"], "NightTemperature");
+            return settingsVal ? settingsVal : 4500;
+        }
+        property int dayTemperature: {
+            var settingsVal = sysConf.readEntry("powermanagementprofilesrc", ["NightColor"], "DayTemperature");
+            return settingsVal ? settingsVal : 6500
+        }
+
+        Component.onCompleted: currentTemperatureChanged()
+        onCurrentTemperatureChanged: {
+            var _scheduledTransition = global.misc.dBus.get("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "scheduledTransitionDateTime");
+            scheduledTransition = _scheduledTransition > 0 ? _scheduledTransition : 0;
+            if (!inhibited && !previewing) {
+                systemActive = currentTemperature==nightTemperature;
+            }
+        }
+    }
+    readonly property var nightMode: Item {
+        readonly property int currentTemperature: redshiftMonitor.currentTemperature
+        readonly property int nightTemperature: redshiftMonitor.nightTemperature
+        readonly property int dayTemperature: redshiftMonitor.dayTemperature
+        readonly property int secondsUntilSwitch: redshiftMonitor.scheduledTransition - Date.now()/1000
+        readonly property bool active: currentTemperature == nightTemperature
+        readonly property var disable: function() {
+            if (!active) {
+                return;
+            }
+            if (redshiftMonitor.systemActive && !inhibited) {
+                console.log("inhibiting")
+                redshiftInhibitor.inhibit();
+            } else if (redshiftMonitor.previewing) {
+                redshiftMonitor.previewing = false;
+                global.misc.dBus.call("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "stopPreview", []);
+                console.log("!previewing")
+            }
+        }
+        readonly property var enable: function() {
+            if (active) {
+                return;
+            }
+            if (redshiftMonitor.systemActive && inhibited) {
+                redshiftInhibitor.uninhibit();
+            } else if (!redshiftMonitor.previewing) {
+                redshiftMonitor.previewing = true;
+                global.misc.dBus.call("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "preview", [nightTemperature], "u");
+            }
+        }
+        readonly property var uninhibit: function() {
+            redshiftInhibitor.uninhibit()
+        }
+        readonly property bool inhibited: redshiftInhibitor.inhibited
+    }
     readonly property var lid: Item {
         function backupEntry(newValue) {
             var old = sysConf.readEntry("powermanagementprofilesrc", [type, "HandleButtonEvents"], "lidAction");
@@ -59,7 +138,7 @@ Item {
             readonly property double minutes: Math.floor(pmSource.remaining/60)
             readonly property double seconds: Math.floor(pmSource.remaining)
         }
-        readonly property string icon: global.misc.getIcon.volume(pmSource.now, pmSource.isCharging)
+        readonly property string icon: global.misc.getIcon.battery(pmSource.now, pmSource.isCharging)
         readonly property string status: pmSource.status
         readonly property string timeStatus: pmSource.status2
         readonly property var history: Item {

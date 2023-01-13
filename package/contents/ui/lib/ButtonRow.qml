@@ -17,30 +17,21 @@ GridView {
     highlight: Item{}
     model: pButtons.length
     snapMode: GridView.SnapToRow
-    boundsBehavior: Flickable.StopAtBounds
+    boundsBehavior: width > cellWidth*pButtons.length ? Flickable.StopAtBounds : Flickable.DragAndOvershootBounds
     flow: GridView.FlowTopToBottom
-    delegate: Button {
-        id: btnRoot
-
-        property var btn: root.pButtons[index]
+    delegate: Item {
         width: root.cellWidth - root.spacing
         height: root.cellHeight
-        icon {
-            width: btnRoot.width
-            height: btnRoot.height
-        }
-        flat: true
-        text: !!btn.text ? btn.text : ""
-        ToolTip.delay: 500
-        ToolTip.text: !!btn.tooltip ? btn.tooltip : ""
-        ToolTip.visible: hovered && ToolTip.text != ""
-        onClicked: btn.onClicked()
-        Image {
-            source: !!btnRoot.btn.icon ? btnRoot.btn.icon : ""
-            anchors.fill: parent
-            anchors.margins: 4
-            onStatusChanged: if (status==Image.Error && source) { source = ""; btnRoot.icon.name = btnRoot.btn.icon }
+        TouchButton {
+            anchors.centerIn: parent
+            property var btn: root.pButtons[model.index]
+
+            size: parent.height
+            icon: btn.icon
+            overlayLocation: btn.overlay && btn.overlay.location ? btn.overlay.location : 0
+            overlayIcon: btn.overlay && btn.overlay.icon ? btn.overlay.icon : 0
+            onClicked: btn.onClicked()
+            onRightClicked: btn.onRightClicked()
         }
     }
 }
-
