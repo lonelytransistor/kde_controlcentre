@@ -6,7 +6,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 GridView {
     id: root
     property var buttons: []
-    property int spacing: global.smallSpacing
+    property int spacing: Global.smallSpacing
 
     readonly property var pButtons: buttons.translated !== undefined ? buttons.translated : buttons
     height: parent.height
@@ -23,6 +23,7 @@ GridView {
         width: root.cellWidth - root.spacing
         height: root.cellHeight
         TouchButton {
+            id: btnItem
             anchors.centerIn: parent
             property var btn: root.pButtons[model.index]
 
@@ -30,8 +31,8 @@ GridView {
             icon: btn.icon
             overlayLocation: btn.overlay && btn.overlay.location ? btn.overlay.location : 0
             overlayIcon: btn.overlay && btn.overlay.icon ? btn.overlay.icon : 0
-            onClicked: btn.onClicked()
-            onRightClicked: btn.onRightClicked()
+            onClicked: btn.onClicked ? btn.onClicked(btnItem) : ()=>false
+            onRightClicked: btn.onRightClicked ? btn.onRightClicked(btnItem) : ()=>false
         }
     }
 }

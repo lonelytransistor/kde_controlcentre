@@ -7,7 +7,7 @@ Item {
     property var modelData
     readonly property var info: modelData ? modelData : {"icon": "", "title": "", "description": "", "splitter": false}
 
-    Icon {
+    WidgetIcon {
         id: icon
         anchors {
             top: parent.top

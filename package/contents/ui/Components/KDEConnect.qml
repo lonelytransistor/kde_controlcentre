@@ -6,18 +6,24 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.kdeconnect 1.0
 
 import "../lib" as Lib
+import ".."
 
 Repeater {
-    model: DevicesModel {
-        displayFilter: DevicesModel.Paired | DevicesModel.Reachable
+    property var widgetInfo: WidgetInfo {
+        title: "KDE Connect"
+        description: "A widget used to control KDE Connect compatible devices."
+        icon: "kdeconnect"
+        uuid: "kdeconnect"
     }
+
+    model: DevicesModel { displayFilter: DevicesModel.Paired | DevicesModel.Reachable }
 
     DropArea {
         id: fileDropArea
         height: kdeRoot.height
-        width: global.fullRepWidth
+        width: Global.fullRepWidth
         onHeightChanged: if (parent) parent.height = kdeRoot.height
-        onWidthChanged: if (parent) parent.width = global.fullRepWidth
+        onWidthChanged: if (parent) parent.width = Global.fullRepWidth
 
         readonly property variant share: ShareDbusInterfaceFactory.create(model.deviceId)
         property bool dropping: false
@@ -45,7 +51,7 @@ Repeater {
         PlasmaComponents.Label {
             id: fileDropLabel
             anchors.fill: parent
-            font.pixelSize: global.largeFontSize
+            font.pixelSize: Global.largeFontSize
             font.weight: Font.Bold
             font.capitalization: Font.Capitalize
             horizontalAlignment: Text.AlignHCenter
@@ -64,7 +70,7 @@ Repeater {
             readonly property variant findMyPhone:   FindMyPhoneDbusInterfaceFactory.create(model.deviceId)
             readonly property variant sftp:          SftpDbusInterfaceFactory.create(model.deviceId)
             readonly property variant notifications: NotificationsModel{deviceId: model.deviceId}
-            readonly property var icon:              global.misc.getIcon
+            readonly property var icon:              Global.misc.getIcon
 
             leftTitle: model.name
             rightTitle: (battery.isCharging ? "🗲 " : "") + battery.charge + "%"

@@ -32,6 +32,7 @@ toPyObject(type v) {\
       PyErr_Clear();\
     }\
     stackFree();\
+    stackSet();\
     return QVariant();\
   } else {\
     stackPush(name);\
@@ -136,7 +137,9 @@ private:
   }
 
   QVariant fromPyObject(PyObject* v) {
-    if (PyTuple_Check(v)) {
+    if (v == NULL) {
+      return QVariant();
+    } else if (PyTuple_Check(v)) {
       QVariantList list;
       for (int ix = 0; ix < PyTuple_Size(v); ix++) {
         list.push_back(fromPyObject(PyTuple_GetItem(v, ix)));

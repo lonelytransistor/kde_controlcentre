@@ -35,7 +35,7 @@ Item {
             top: parent.top
             horizontalCenter: parent.horizontalCenter
         }
-        font.pixelSize: global.mediumFontSize
+        font.pixelSize: Global.mediumFontSize
         font.weight: Font.Bold
         font.capitalization: Font.Capitalize
         visible: text!=""
@@ -46,16 +46,16 @@ Item {
             left: parent.left
             verticalCenter: control.verticalCenter
         }
-        size: global.largeFontSize*2
+        size: Global.largeFontSize*2
         onPressed: sliderRoot.iconPressed();
     }
     PlasmaComponents.Slider {
         id: control
         anchors {
             left: icon.source ? icon.right : parent.left
-            leftMargin: global.smallSpacing
+            leftMargin: Global.smallSpacing
             right: info.text ? info.left : parent.right
-            rightMargin: global.smallSpacing
+            rightMargin: Global.smallSpacing
             top: title.visible ? title.bottom : parent.top
             topMargin: title.visible ? -title.height*0.25 : 0
             bottom: parent.bottom
@@ -136,12 +136,12 @@ Item {
         id: info
         anchors {
             right: parent.right
-            rightMargin: global.smallSpacing
+            rightMargin: Global.smallSpacing
             verticalCenter: control.verticalCenter
         }
         elide: Text.ElideRight
         font.weight: Font.Bold
-        font.pixelSize: global.largeFontSize
+        font.pixelSize: Global.largeFontSize
         visible: text!=""
     }
 }

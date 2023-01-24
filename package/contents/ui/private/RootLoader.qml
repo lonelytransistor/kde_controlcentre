@@ -4,7 +4,7 @@ import org.kde.plasma.plasmoid 2.0
 Loader {
     id: root
 
-    readonly property var fn: global.misc.object
+    readonly property var fn: Global.misc.object
     readonly property var pChildren: fn.findChild(root, n => n.objectName==="Card")
     readonly property bool expanded: plasmoid.expanded
 

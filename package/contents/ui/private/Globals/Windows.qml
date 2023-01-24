@@ -1,10 +1,11 @@
 import QtQuick 2.0
+import "windows" as W
 
 Item {
     Item {
         id: cache
         property var activeWindow: null
-        property var login: Component{WindowLogin{}}
+        property var login: Component{W.Login{}}
     }
     Timer {
         id: destroy
@@ -17,8 +18,8 @@ Item {
             }
         }
     }
-    readonly property var login: function(logo, prompt, cbAccept, cbReject) {
-        var window = cache.login.createObject(global, {logo: logo, prompt: prompt});
+    readonly property var login: function(logo, prompt, cbAccept, cbReject, showSave=false) {
+        var window = cache.login.createObject(Global, {logo: logo, prompt: prompt, showSave: showSave});
         window.accepted.connect(cbAccept);
         window.rejected.connect(cbReject);
         window.closed.connect(destroy.start);

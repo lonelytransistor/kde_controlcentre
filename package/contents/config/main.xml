@@ -86,5 +86,8 @@
         <entry name="widgetOrder" type="string">
             <default>quickbuttons,battery,kdeconnect,protonmail,sessionbuttons</default>
         </entry>
+        <entry name="widgetCache" type="string">
+            <default></default>
+        </entry>
     </group>
 </kcfg>

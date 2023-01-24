@@ -5,29 +5,25 @@ import QtQuick.Window 2.15
 Window {
     id: root
 
-    property color backGroundColor : "#394454"
+    property color backGroundColor: "#4f5b66"
     property color mainAppColor: "#6fda9c"
     property color mainTextColor: "#f0f0f0"
     property color popupErrorBackgroundColor: "#b44"
     property color popupFinishBackgroundColor: "#4b4"
     property color popupTextColor: "#ffffff"
 
-    property string logo: "protonmail.svg"
-    property string prompt: "Type in your ProtonMail credentials."
+    property string logo: ""
+    property string prompt: ""
     property string finishMessage: ""
     property string errorMessage: ""
+    property bool showSave: false
 
-    property int logoSpacing: 70
+    property int logoSpacing: 40
     property int itemSpacing: 30
 
-    FontLoader {
-        id: fontAwesome
-        name: "fontawesome"
-        source: "fontawesome-webfont.ttf"
-    }
     color: backGroundColor
 
-    signal accepted(finish: var, error: var, login: string, password: string)
+    signal accepted(finish: var, error: var, login: string, password: string, save: bool)
     signal rejected
     signal closed
     signal finish(err: string)
@@ -58,10 +54,12 @@ Window {
             right: parent.right
             topMargin: root.logoSpacing
         }
-        height: width*0.15
+        height: width*0.2
         fillMode: Image.PreserveAspectFit
         horizontalAlignment: Image.AlignHCenter
         source: !!root.logo ? root.logo : ""
+        sourceSize.width: width
+        sourceSize.height: height
         onStatusChanged: if (status==Image.Error && source) { source = ""; icon.name = root.logo }
     }
     Text {
@@ -76,7 +74,7 @@ Window {
         font.pixelSize: 14
         font.weight: Font.Bold
     }
-    WindowLoginTextField {
+    LoginTextField {
         id: login
         anchors {
             top: prompt.bottom
@@ -87,7 +85,7 @@ Window {
         placeholderText: qsTr("User name")
         onAccepted: loginBtn.clicked()
     }
-    WindowLoginTextField {
+    LoginTextField {
         id: password
         anchors {
             top: login.bottom
@@ -99,14 +97,29 @@ Window {
         placeholderText: qsTr("Password")
         onAccepted: loginBtn.clicked()
     }
-    Item {
+    Switch {
+        id: controlRoot
         anchors {
             top: password.bottom
             left: password.left
             right: password.right
             topMargin: root.itemSpacing
         }
-        WindowLoginButton {
+        indicator.height: height
+        indicator.width: height*2
+        contentItem.anchors.centerIn: controlRoot
+        visible: root.showSave
+        font.pixelSize: 16
+        text: qsTr("  Save login data")
+    }
+    Item {
+        anchors {
+            top: controlRoot.bottom
+            left: password.left
+            right: password.right
+            topMargin: root.itemSpacing/2
+        }
+        LoginButton {
             id: loginBtn
             anchors {
                 top: parent.top
@@ -117,7 +130,7 @@ Window {
             onClicked: {
                 if (password.text.length && login.text.length) {
                     spinner.visible = true;
-                    root.accepted(root.finish, root.errors, login.text, password.text);
+                    loginBtnDelay.start();
                 } else if (!password.text.length && !login.text.length) {
                     root.errors("Please enter your credentials.");
                 } else if (!password.text.length) {
@@ -126,8 +139,13 @@ Window {
                     root.errors("Please enter your user name.");
                 }
             }
+            Timer {
+                id: loginBtnDelay
+                interval: 1
+                onTriggered: root.accepted(root.finish, root.errors, login.text, password.text, controlRoot.checked);
+            }
         }
-        WindowLoginButton {
+        LoginButton {
             id: cancelBtn
             anchors {
                 top: parent.top
@@ -137,6 +155,7 @@ Window {
             baseColor: "transparent"
             onClicked: {
                 root.rejected();
+                root.close();
             }
         }
     }

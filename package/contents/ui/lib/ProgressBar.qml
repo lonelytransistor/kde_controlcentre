@@ -22,14 +22,14 @@ Item {
 
     Icon {
         id: icon
-        size: global.largeFontSize*2
+        size: Global.largeFontSize*2
         onPressed: progressBarRoot.iconPressed();
     }
     PlasmaComponents.Slider {
         id: control
         anchors {
             left: icon.source ? icon.right : parent.left
-            leftMargin: global.smallSpacing
+            leftMargin: Global.smallSpacing
             right: parent.right
             verticalCenter: parent.verticalCenter
         }

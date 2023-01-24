@@ -8,7 +8,7 @@ Item {
 
     width: size
     height: size
-    property int size: global.largeFontSize*2
+    property int size: Global.largeFontSize*2
     property alias icon: btnIcon.source
     property alias overlayIcon: btnIcon.overlayIcon
     property alias overlayLocation: btnIcon.overlayLocation

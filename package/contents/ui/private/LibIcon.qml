@@ -9,10 +9,10 @@ Item {
     id: root
     height: size
     width: size
-    property int size: global.largeFontSize*2
+    property int size: Global.largeFontSize*2
     property bool glow: false
     property color glowColor: rootIcon.invertedColor
-    property string source: root.source
+    property string source: ""
     readonly property color averageColor: root.averageColor
 
     signal pressed
@@ -26,7 +26,7 @@ Item {
     }
     function getAverageColor() {
         if ((rootIcon.windowObj && rootIcon.windowObjVisible) && ((icon.source && icon.valid) || (image.source && image.status == Image.Ready))) {
-            global.misc.getImageAverageColor(rootIcon, c => rootIcon.averageColor = c);
+            Global.misc.getImageAverageColor(rootIcon, c => rootIcon.averageColor = c);
         }
     }
     Glow {
@@ -69,11 +69,13 @@ Item {
             sourceSize.width: width
             sourceSize.height: height
             source: {
-                if (global.misc.getImageType(root.source) == "") {
+                if (Global.misc.getImageType(Qt.resolvedUrl(root.source).substring(7)) != "") {
+                    return root.source
+                } else if (Global.misc.getB64ImageType(root.source) != "") {
+                    return root.source
+                } else {
                     icon.source = root.source
                     return ""
-                } else {
-                    return root.source
                 }
             }
             onSourceChanged: getAverageColor();

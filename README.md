@@ -1,10 +1,10 @@
-> :warning: Due to upcoming exams, this project will not be maintained for a few months.
+> :warning: This is a fork. A way more functional but very, very unstable fork. Use at your own risk!
 <hr>
 
 <p align="center">
   <img src="https://github.com/Prayag2/kde_controlcentre/blob/main/assets/logo.jpg" width=100/>
   <h1 align="center">Control Centre for KDE</h1>
-  <p align="center">A simple control centre widget for KDE Plasma inspired by MacOS!</center>
+  <p align="center">A "simple" control centre widget for KDE Plasma inspired by MacOS!</center>
 </p>
 
 <p align="center">

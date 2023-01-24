@@ -21,7 +21,7 @@ ToolTip {
         anchors.top: parent.top
         text: root.text
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: global.largeFontSize
+        font.pixelSize: Global.largeFontSize
         font.weight: Font.Bold
     }
     background: Shape {

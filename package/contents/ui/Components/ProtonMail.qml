@@ -5,15 +5,22 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.core 2.0 as PlasmaCore
 
 import "../lib" as Lib
+import ".."
 
 Lib.Card {
+    widgetInfo: WidgetInfo {
+        title: "ProtonMail client"
+        description: "A widget checking for e-mails on your ProtonMail account every 30 minutes."
+        icon: "mail-read"
+        uuid: "protonmail"
+    }
+
     id: protonRoot
 
-    readonly property var mail: global.sources.mail.protonMail
+    readonly property var mail: Global.sources.mail.protonMail
 
     leftTitle: "ProtonMail"
-    rightTitle: mail.unread.length>1 ? (mail.unread.length + " unread e-mails.") : (mail.unread.length==1 ? "1 unread e-mail." : "No unread e-mails.")
-    //visible: mail.unread.length>0
+    rightTitle: mail.unread.length>1 ? (mail.unread.length + " new e-mails.") : (mail.unread.length==1 ? "1 new e-mail." : "No new e-mails.")
 
     Timer {
         id: updateTimer

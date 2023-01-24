@@ -5,6 +5,9 @@ const void* m_libPython = dlopen("libpython3.so", RTLD_NOW | RTLD_GLOBAL);
 PythonLoader::PythonLoader() {
   Py_Initialize();
   PyRun_SimpleString("import os, sys, __main__");
+
+  QString cwd = LonelyTransistorBase::getCWDString();
+  PyRun_SimpleString(("if (os.getcwd()!=\"" + cwd + "\"): os.chdir(\"" + cwd + "\")").toStdString().c_str());
 }
 PythonLoader::~PythonLoader() {
   Py_Finalize();
@@ -48,6 +51,7 @@ void PythonLoader::stackFree() {
     Py_DECREF(it);
     m_allocatedObjects.removeLast();
   }
+  stackSet();
 }
 
 QVariant PythonLoader::importModule(QString url) {
@@ -81,15 +85,20 @@ QVariant PythonLoader::call(QString mod, QString fn, QVariantList params) {
     PyObject* pyMod = PyImport_GetModule(toPyObject(mod.toStdString().c_str()));
     stackFree();
 
-    py_newobj(pyDict2, PyModule_GetDict(pyMod));
-    pyDict = pyDict2;
-    m_modules[mod] = pyMod;
-    m_moduleDicts[mod] = pyDict;
+    if (pyMod == NULL) {
+      pyMod = toPyObject(importModule(mod));
+    } else {
+      py_newobj(pyDict2, PyModule_GetDict(pyMod));
+      pyDict = pyDict2;
+      m_modules[mod] = pyMod;
+      m_moduleDicts[mod] = pyDict;
+    }
   }
   stackSet();
 
   const char* pyVar = fn.toStdString().c_str();
   if (pyDict == NULL) {
+    stackFree();
     return ret;
   }
   PyObject* pyFunc = PyDict_GetItemString(pyDict, pyVar); // This function only borrows an object!

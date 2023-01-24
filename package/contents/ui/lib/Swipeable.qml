@@ -57,10 +57,15 @@ Item {
             maximumLineCount: 1
             wrapMode: Text.WordWrap
         }
-        Icon {
+        Item {
             id: iconLeft
-            size: parent.height*0.8
-            source: root.iconLeft
+            height: parent.height
+            width: height
+            Icon {
+                anchors.centerIn: parent
+                size: parent.height*0.8
+                source: root.iconLeft
+            }
         }
     }
     Rectangle {
@@ -72,10 +77,15 @@ Item {
             left: bgCentre.right
         }
         color: root.colorRight
-        Icon {
+        Item {
             id: iconRight
-            size: parent.height*0.8
-            source: root.iconRight
+            height: parent.height
+            width: height
+            Icon {
+                anchors.centerIn: parent
+                size: parent.height*0.8
+                source: root.iconRight
+            }
         }
         Text {
             id: textRight
@@ -149,10 +159,15 @@ Item {
         ]
         x: 0
         color: root.colorCentre
-        Icon {
+        Item {
             id: iconCentre
-            size: parent.height*0.8
-            source: root.iconCentre
+            height: parent.height
+            width: height
+            Icon {
+                anchors.centerIn: parent
+                size: parent.height*0.8
+                source: root.iconCentre
+            }
         }
         Text {
             id: text

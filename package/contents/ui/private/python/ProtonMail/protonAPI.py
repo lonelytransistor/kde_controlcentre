@@ -14,10 +14,10 @@ class Main:
     LABEL_ARCHIVE = "6"
     LABEL_STARRED = "10"
 
-    def __init__(self):
-        self.cacheFile = "./protonmail.cache"
-        self.cachePath = "/tmp/cache"
-        self.logPath = "/tmp/log"
+    def __init__(self, cFile = "protonmail.cache", cPath = "/tmp/cache", lPath = "/tmp/log"):
+        self.cacheFile = cFile
+        self.cachePath = cPath
+        self.logPath = lPath
         self.cache = {}
         self.status = 0
         self.session = None
@@ -86,7 +86,6 @@ class Main:
             try:
                 if (params == {}):
                     params = None
-                print(endpoint, params, jsondata)
                 return self.session.api_request(endpoint, method=method, jsondata=jsondata, params=params)
             except ProtonError as e:
                 print("EX!", e)
@@ -163,25 +162,3 @@ class Main:
         return self.api_request("/mail/v4/conversations/read", "put", IDs=[uid])
     def markUnread(self, uid):
         return self.api_request("/mail/v4/conversations/unread", IDs=[uid], LabelID="0")
-
-main = Main()
-def ping():
-    main.getEMails()
-    return main.getStatus()
-def status():
-    return main.getStatus()
-def newMails():
-    return main.getEMails()
-def setCredentials(login, password):
-    main.setCredentials(login, password)
-    return ping()
-def read(uid, t):
-    if (t):
-        return main.markRead(uid)
-    else:
-        return main.markUnread(uid)
-def archive(uid, t):
-    if (t):
-        return main.moveFolder(uid, main.LABEL_ARCHIVE)
-    else:
-        return main.moveFolder(uid, main.LABEL_INBOX)

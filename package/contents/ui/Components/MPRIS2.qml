@@ -6,14 +6,22 @@ import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.components 3.0 as PlasmaComponents
 
 import "../lib" as Lib
+import ".."
 
 Lib.Card {
+    widgetInfo: WidgetInfo {
+        title: "MPRIS control"
+        description: "A widget for music playback control with detailed per-app control and pulseeffects support."
+        icon: "media-playback-start"
+        uuid: "mpris"
+    }
+
     id: volumeRoot
 
-    readonly property var mpris2: global.sources.mpris2
+    readonly property var mpris2: Global.sources.mpris2
     readonly property var multiplex: mpris2.multiplex ? mpris2.multiplex : {}
     readonly property var players: mpris2.players ? mpris2.players : {}
-    readonly property var printf: global.misc.time.printf
+    readonly property var printf: Global.misc.time.printf
 
     visible: players.length!=0
 
@@ -27,7 +35,7 @@ Lib.Card {
         }
     }
     rightSubtitle: {
-        if (multiplex.artist) {
+        if (multiplex.artist && multiplex.artist.length > 0) {
             return multiplex.artist
         } else {
             return "Unknown artist"
@@ -61,7 +69,7 @@ Lib.Card {
                 anchors {
                     left: parent.left
                     bottom: parent.bottom
-                    leftMargin: global.smallSpacing
+                    leftMargin: Global.smallSpacing
                 }
                 width: 60
                 height: 60
@@ -75,7 +83,7 @@ Lib.Card {
                     top: parent.top
                     bottom: parent.bottom
                     right: playBTN.left
-                    rightMargin: global.smallSpacing
+                    rightMargin: Global.smallSpacing
                 }
                 icon.name: "media-skip-backward"
                 onClicked: multiplex.prev()
@@ -86,7 +94,7 @@ Lib.Card {
                     top: parent.top
                     bottom: parent.bottom
                     right: nextBTN.left
-                    rightMargin: global.smallSpacing
+                    rightMargin: Global.smallSpacing
                 }
                 icon.name: multiplex.isPlaying ? "media-playback-pause" : "media-playback-start"
                 onClicked: multiplex.isPlaying ? multiplex.pause() : multiplex.play()
@@ -97,7 +105,7 @@ Lib.Card {
                     top: parent.top
                     bottom: parent.bottom
                     right: parent.right
-                    rightMargin: global.smallSpacing
+                    rightMargin: Global.smallSpacing
                 }
                 icon.name: "media-skip-forward"
                 onClicked: multiplex.next()
@@ -106,7 +114,7 @@ Lib.Card {
         Lib.Slider {
             id: playbackSlider
             value: position
-            Layout.topMargin: -global.mediumFontSize*2
+            Layout.topMargin: -Global.mediumFontSize*2
             title: printf(multiplex.position/1000, "%N:%S/") + printf(multiplex.length/1000, "%N:%S")
             tooltipValue: printf((isPressed ? value*multiplex.length/100 : multiplex.position)/1000, "%N:%S/") + printf(multiplex.length/1000, "%N:%S")
             onReleased: multiplex.seekTo(Math.round(value*multiplex.length/100));
@@ -144,7 +152,7 @@ Lib.Card {
                     }
                     elide: Text.ElideRight
                     text: pmodel.app + ": " + pmodel.artist + " - " + pmodel.title
-                    font.pixelSize: global.mediumFontSize
+                    font.pixelSize: Global.mediumFontSize
                     font.weight: Font.Bold
                     font.capitalization: Font.Capitalize
                 }
@@ -153,7 +161,7 @@ Lib.Card {
                         bottom: parent.bottom
                         left: parent.left
                         right: prevBTN.left
-                        rightMargin: global.smallSpacing
+                        rightMargin: Global.smallSpacing
                     }
                     value: position
                     tooltipValue: printf((isPressed ? value*pmodel.length/100 : pmodel.position)/1000, "%N:%S/") + printf(pmodel.length/1000, "%N:%S")
@@ -169,7 +177,7 @@ Lib.Card {
                     anchors {
                         bottom: parent.bottom
                         right: playBTN.left
-                        rightMargin: global.smallSpacing
+                        rightMargin: Global.smallSpacing
                     }
                     icon.name: "media-skip-backward"
                     onClicked: pmodel.prev()
@@ -179,7 +187,7 @@ Lib.Card {
                     anchors {
                         bottom: parent.bottom
                         right: nextBTN.left
-                        rightMargin: global.smallSpacing
+                        rightMargin: Global.smallSpacing
                     }
                     icon.name: pmodel.isPlaying ? "media-playback-pause" : "media-playback-start"
                     onClicked: pmodel.isPlaying ? pmodel.pause() : pmodel.play()
@@ -189,7 +197,7 @@ Lib.Card {
                     anchors {
                         bottom: parent.bottom
                         right: parent.right
-                        rightMargin: global.smallSpacing
+                        rightMargin: Global.smallSpacing
                     }
                     icon.name: "media-skip-forward"
                     onClicked: pmodel.next()

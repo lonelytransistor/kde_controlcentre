@@ -9,7 +9,7 @@ ListView {
     Layout.preferredHeight: height
     height: (children[0].children.length ? Math.min(model.count ? model.count : jsonModel.length, maxVisible)*(itemHeight + spacing) : 0) - spacing
     width: parent.width
-    spacing: global.smallSpacing
+    spacing: Global.smallSpacing
 
     property bool canRefresh: false
     property bool refreshPossible: false
@@ -38,11 +38,15 @@ ListView {
         interval: 10
         onTriggered: root.refreshing += 0.025
     }
+    onRefreshed: {
+        refreshing = 0.0;
+        interactive = true;
+    }
 
     property var jsonModel: []
     model: jsonModel.length
 
-    property int itemHeight: 0.7*global.sectionHeight/3 - spacing
+    property int itemHeight: 0.7*Global.sectionHeight/3 - spacing
     property int maxVisible: 3
 
     property var colorLeft: n => "#30f030"

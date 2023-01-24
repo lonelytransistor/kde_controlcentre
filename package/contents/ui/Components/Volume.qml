@@ -5,11 +5,19 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.plasma.private.volume 0.1 as Vol
 
 import "../lib" as Lib
+import ".."
 
 Lib.Card {
+    widgetInfo: WidgetInfo {
+        title: "Volume"
+        description: "A widget for volume control and a detailed per-application and per-device volume manager."
+        icon: "audio-volume-medium"
+        uuid: "volume"
+    }
+
     id: volumeRoot
 
-    readonly property var audio: global.sources.audio
+    readonly property var audio: Global.sources.audio
     readonly property var sinkModel: audio.activeSinks
     readonly property var streamModel: audio.outputStreams
     readonly property var defaultSink: audio.defaultSink

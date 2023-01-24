@@ -7,25 +7,25 @@ Rectangle {
     anchors.fill: parent
     anchors.margins: -50
     color: "black"
-    opacity: 0.3 * global.cards.fraction
+    opacity: 0.3 * Global.cards.fraction
     z: 1
 
     readonly property bool expanded: plasmoid.expanded
-    onExpandedChanged: if (!expanded) global.cards.collapseAll()
+    onExpandedChanged: if (!expanded) Global.cards.collapseAll()
 
     TouchArea {
         anchors.fill: parent
-        enabled: global.cards.fraction == 1.0
+        enabled: Global.cards.fraction == 1.0
         z: 1
         onTouchPress: {
             ev.accepted = true;
         }
         onTouchRelease: {
-            global.cards.collapseAll();
+            Global.cards.collapseAll();
             ev.accepted = true;
         }
         onMousePress: {
-            global.cards.collapseAll();
+            Global.cards.collapseAll();
             ev.accepted = true;
         }
         onMouseRelease: {

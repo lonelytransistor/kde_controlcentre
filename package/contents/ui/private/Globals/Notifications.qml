@@ -10,13 +10,7 @@ Item {
     }
     NotificationManager.Settings {
         id: notificationSettings
-        Component.onCompleted: {
-            settingsChanged();
-            NotificationManager.Server.onInhibitedChanged = function(b) {
-                isInhibited2 = b;
-                settingsChanged();
-            }
-        }
+        Component.onCompleted: settingsChanged();
         onSettingsChanged: {
             if (!serverRunning) {
                 return;

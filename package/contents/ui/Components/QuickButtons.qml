@@ -1,34 +1,54 @@
 import QtQuick 2.15
 
 import "../lib" as Lib
+import ".."
 
 Item {
+    property var widgetInfo: WidgetInfo {
+        title: "Quick buttons"
+        description: "A widget containing buttons like on Android."
+        icon: "quickopen"
+        uuid: "quickbuttons"
+    }
+
     id: root
 
     property var dndTimes: [0, 1, 3, 8, 12]
-    property double dndTime: global.sources.notifications.inhibitedUntil/3600
+    property double dndTime: Global.sources.notifications.inhibitedUntil/3600
     property double dndTimeNormalized: Math.bigger(dndTime, ...dndTimes)
     property int dndIndex: dndTimes.indexOf(dndTimeNormalized)
-    property var nightMode: global.sources.powerManagement.nightMode
+
+    property var nightMode: Global.sources.powerManagement.nightMode
+    property var powerProfile: Global.sources.powerManagement.powerProfile
 
     property int dnd: dndTime==0 ? 0 : dndIndex+1
-    property int powerMode: 0
+    property string powerMode: powerProfile.active
+    property int powerModeIndex: powerProfile.activeIndex
     property bool redshift: nightMode.enabled
+    property bool airplaneMode: false
 
+    Lib.FullPopup {
+        id: wifiPopup
+        title: "|icon:network-wired:| Network Connections"
+    }
+    Lib.FullPopup {
+        id: btPopup
+        title: "|icon:network-bluetooth:| Bluetooth"
+    }
     Lib.ButtonRow {
         id: row
         anchors.fill: parent
-        anchors.margins: global.smallSpacing
-        spacing: global.smallSpacing
+        anchors.margins: Global.smallSpacing
+        spacing: Global.smallSpacing
         buttons: [{
             "tooltip": "WiFi",
             "icon": "network-wireless",
-            "onClicked": ()=>console.log("wifi"),
+            "onClicked": (it)=>wifiPopup.expand(it),
             "onRightClicked": ()=>console.log("wifi long")
         },{
             "tooltip": "Bluetooth",
             "icon": "network-bluetooth",
-            "onClicked": ()=>0,
+            "onClicked": (it)=>btPopup.expand(it),
             "onRightClicked": ()=>console.log("bt long")
         },{
             "tooltip": "Do not disturb",
@@ -44,34 +64,32 @@ Item {
                     _dnd = 0;
                 while (_dnd < 0)
                     _dnd = 4;
-                global.sources.notifications.inhibit(3600*root.dndTimes[_dnd]);
-            },
-            "onRightClicked": ()=>0
+                Global.sources.notifications.inhibit(3600*root.dndTimes[_dnd]);
+            }
         },{
             "tooltip": "Power mode",
-            "icon": root.powerMode==0 ? "speedometer" : powerMode==1 ? "quickopen" : "plugins",
-            "onClicked": ()=>0,
+            "icon": "../../assets/" + root.powerMode + ".svg",
+            "onClicked": () => {
+                var newPM = root.powerModeIndex + 1;
+                if (newPM > root.powerProfile.profiles.length-1) {
+                    newPM = 0;
+                }
+                root.powerProfile.set(newPM);
+            },
             "onRightClicked": ()=>console.log("wifi long")
         },{
             "tooltip": "Night mode",
             "icon": root.nightMode.active ? "redshift-status-on" : "redshift-status-off",
-            "onClicked": () => root.nightMode.active ? root.nightMode.disable() : root.nightMode.enable(),
-            "onRightClicked": ()=>console.log("wifi long")
+            "onClicked": () => root.nightMode.active ? root.nightMode.disable() : root.nightMode.enable()
         },{
             "tooltip": "Airplane mode",
-            "icon": "network-wireless",
-            "onClicked": ()=>0,
-            "onRightClicked": ()=>console.log("wifi long")
-        },{
-            "tooltip": "Airplane mode",
-            "icon": "network-wireless",
-            "onClicked": ()=>0,
-            "onRightClicked": ()=>console.log("wifi long")
+            "icon": "../../assets/airplane_" + (root.airplaneMode ? "on" : "off") + ".svg",
+            "onClicked": ()=>root.airplaneMode = !root.airplaneMode
         }]
     }
     objectName: "Card"
     height: pHeight
     width: pWidth
     readonly property int pHeight: pWidth/5
-    readonly property int pWidth: global.fullRepWidth
+    readonly property int pWidth: Global.fullRepWidth
 }

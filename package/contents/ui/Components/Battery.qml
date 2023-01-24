@@ -2,11 +2,19 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 
 import "../lib" as Lib
+import ".."
 
 Lib.Card {
-    readonly property var battery: global.sources.powerManagement.battery
-    readonly property var inhibitions: sources.powerManagement.inhibitions
-    readonly property var lid: sources.powerManagement.lid
+    widgetInfo: WidgetInfo {
+        title: "Battery info"
+        description: "A small battery widget with a battery charge/rate graph."
+        icon: "battery-good"
+        uuid: "battery"
+    }
+
+    readonly property var battery: Global.sources.powerManagement.battery
+    readonly property var inhibitions: Global.sources.powerManagement.inhibitions
+    readonly property var lid: Global.sources.powerManagement.lid
     readonly property var history: battery.history.charge
 
     leftTitle: "Battery"

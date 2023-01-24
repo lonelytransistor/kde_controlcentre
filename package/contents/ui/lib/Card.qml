@@ -24,30 +24,31 @@ Item {
     z: cardRootOffset.fraction>0.0 ? 2 : 0
 
     property bool isExpanded: cardRootOffset.state == "expanded";
-    readonly property var expand: function() {global.cards.expand(cardRoot, cardRootOffset)}
-    readonly property var collapse: function() {global.cards.collapse(cardRoot, cardRootOffset)}
-    readonly property int pHeight: visible ? (cardRootOffset.smallHeight + 2*global.smallSpacing) : 0
-    readonly property int pWidth: visible ? global.fullRepWidth : 0
+    readonly property var expand: function() {Global.cards.expand(cardRoot, cardRootOffset)}
+    readonly property var collapse: function() {Global.cards.collapse(cardRoot, cardRootOffset)}
+    readonly property int pHeight: visible ? (cardRootOffset.smallHeight + 2*Global.smallSpacing) : 0
+    readonly property int pWidth: visible ? Global.fullRepWidth : 0
 
     signal expanded
     signal collapsed
 
     objectName: "Card"
+    property var widgetInfo
 
     Item {
         id: normalView
         anchors {
             fill: parent
-            leftMargin: global.smallSpacing
-            rightMargin: global.smallSpacing
-            topMargin: global.smallSpacing/2
-            bottomMargin: global.smallSpacing/2
+            leftMargin: Global.smallSpacing
+            rightMargin: Global.smallSpacing
+            topMargin: Global.smallSpacing/2
+            bottomMargin: Global.smallSpacing/2
         }
 
         Glow {
             id: shadow
             anchors.fill: cardRootOffset
-            radius: global.mediumSpacing
+            radius: Global.mediumSpacing
             samples: 17
             color: "black"
             source: cardRootOffset
@@ -62,12 +63,12 @@ Item {
             clip: true
 
             property double fraction: 0.0
-            onFractionChanged: global.cards.update(fraction)
+            onFractionChanged: Global.cards.update(fraction)
             property int duration: 200
 
             property int pHeight: Math.max(Math.max(leftTitle!=""?leftTitleO.height:0, rightTitle!=""?rightTitleO.height:0) +
                                         Math.max(leftSubtitle!=""?leftSubtitleO.height:0, rightSubtitle!=""?rightSubtitleO.height:0),
-                                        buttonsO.height) + global.mediumSpacing
+                                        buttonsO.height) + Global.mediumSpacing
             property int smallHeight: pHeight + smallRepresentation.height
             property int bigHeight: pHeight + bigRepresentation.height
             property int bigOffset: 0
@@ -82,7 +83,7 @@ Item {
                 }
                 property int bigOffset: -cardRootOffset.bigOffset
                 property bool expanded: plasmoid.expanded;
-                enabled: bigRepresentation.height > smallRepresentation.height
+                //enabled: bigRepresentation.height > smallRepresentation.height
                 z: cardRootOffset.state=="collapsed" ? 0 : 2;
 
                 function updateOffset() {
@@ -174,6 +175,12 @@ Item {
                             } else {
                                 duration = (1.0 - cardRootOffset.fraction)*cardRootOffset.duration;
                             }
+                        } else {
+                            if (cardRootOffset.state == "expanded") {
+                                cardRoot.expanded()
+                            } else {
+                                cardRoot.collapsed()
+                            }
                         }
                     }
                 }
@@ -189,11 +196,11 @@ Item {
                     top: parent.top
                     left: parent.left
                     right: rightTitleO.text ? parent.horizontalCenter : parent.right
-                    leftMargin: global.mediumSpacing
-                    rightMargin: global.mediumSpacing
+                    leftMargin: Global.mediumSpacing
+                    rightMargin: Global.mediumSpacing
                 }
                 text: cardRoot.leftTitle
-                font.pixelSize: global.largeFontSize
+                font.pixelSize: Global.largeFontSize
                 font.weight: Font.Bold
                 font.capitalization: Font.Capitalize
                 elide: Text.ElideRight
@@ -204,11 +211,11 @@ Item {
                     top: leftTitleO.bottom
                     left: parent.left
                     right: rightSubtitleO.text ? parent.horizontalCenter : parent.right
-                    leftMargin: global.mediumSpacing
-                    rightMargin: global.mediumSpacing
+                    leftMargin: Global.mediumSpacing
+                    rightMargin: Global.mediumSpacing
                 }
                 text: cardRoot.leftSubtitle
-                font.pixelSize: global.mediumFontSize
+                font.pixelSize: Global.mediumFontSize
                 font.capitalization: Font.Capitalize
                 elide: Text.ElideRight
             }
@@ -219,7 +226,7 @@ Item {
                     horizontalCenter: parent.horizontalCenter
                 }
                 text: cardRoot.centerSubtitle
-                font.pixelSize: global.mediumFontSize
+                font.pixelSize: Global.mediumFontSize
                 font.capitalization: Font.Capitalize
                 elide: Text.ElideRight
             }
@@ -229,11 +236,11 @@ Item {
                     top: parent.top
                     left: leftTitleO.text ? parent.horizontalCenter : parent.left
                     right: parent.right
-                    leftMargin: global.mediumSpacing
-                    rightMargin: global.mediumSpacing
+                    leftMargin: Global.mediumSpacing
+                    rightMargin: Global.mediumSpacing
                 }
                 text: cardRoot.rightTitle
-                font.pixelSize: global.largeFontSize
+                font.pixelSize: Global.largeFontSize
                 font.weight: Font.Bold
                 font.capitalization: Font.Capitalize
                 horizontalAlignment: Text.AlignRight
@@ -245,11 +252,11 @@ Item {
                     top: rightTitleO.bottom
                     left: leftSubtitleO.text ? parent.horizontalCenter : parent.left
                     right: parent.right
-                    leftMargin: global.mediumSpacing
-                    rightMargin: global.mediumSpacing
+                    leftMargin: Global.mediumSpacing
+                    rightMargin: Global.mediumSpacing
                 }
                 text: cardRoot.rightSubtitle
-                font.pixelSize: global.mediumFontSize
+                font.pixelSize: Global.mediumFontSize
                 font.capitalization: Font.Capitalize
                 horizontalAlignment: Text.AlignRight
                 elide: Text.ElideMiddle
@@ -259,11 +266,11 @@ Item {
                 anchors {
                     top: parent.top
                     horizontalCenter: parent.horizontalCenter
-                    topMargin: global.smallSpacing
+                    topMargin: Global.smallSpacing
                 }
-                spacing: global.smallSpacing
+                spacing: Global.smallSpacing
                 Repeater {
-                    model: cardRoot.buttons.length
+                    model: cardRoot.buttons ? cardRoot.buttons.length : 0
                     ToolButton {
                         id: button
 
@@ -299,7 +306,7 @@ Item {
             }
             ColumnLayout {
                 id: smallRepresentation
-                spacing: global.smallSpacing
+                spacing: Global.smallSpacing
                 anchors {
                     top: {
                         if (leftSubtitle != "" || rightSubtitle != "") {
@@ -311,20 +318,20 @@ Item {
                         }
                     }
                     left: cardRootOffset.fraction==1 ? parent.right : parent.left
-                    leftMargin: global.smallSpacing
+                    leftMargin: Global.smallSpacing
                 }
-                width: parent.width - global.smallSpacing*2
+                width: parent.width - Global.smallSpacing*2
                 opacity: 1.0 - cardRootOffset.fraction
             }
             ColumnLayout {
                 id: bigRepresentation
-                spacing: global.smallSpacing
+                spacing: Global.smallSpacing
                 anchors {
                     top: leftSubtitle!=""||rightSubtitle!="" ? leftSubtitleO.bottom : leftTitleO.bottom
                     left: cardRootOffset.fraction==0 ? parent.right : parent.left
-                    leftMargin: global.smallSpacing
+                    leftMargin: Global.smallSpacing
                 }
-                width: parent.width - global.smallSpacing*2
+                width: parent.width - Global.smallSpacing*2
                 opacity: cardRootOffset.fraction
             }
         }

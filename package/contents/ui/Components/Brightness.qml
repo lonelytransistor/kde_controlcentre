@@ -2,11 +2,19 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 
 import "../lib" as Lib
+import ".."
 
 Lib.Card {
+    widgetInfo: WidgetInfo {
+        title: "Brightness"
+        description: "A widget for brightness control of your laptop's screen or its keyboard."
+        icon: "brightness-high"
+        uuid: "brightness"
+    }
+
     id: bRoot
 
-    readonly property var brightness: global.sources.powerManagement.brightness
+    readonly property var brightness: Global.sources.powerManagement.brightness
     readonly property var screen: brightness.screen
     readonly property var keyboard: brightness.keyboard
 
@@ -17,7 +25,7 @@ Lib.Card {
         Lib.Slider {
             readonly property int normalized: Math.round(100*value/bRoot.screen.max)
 
-            icon: global.misc.getIcon.brightness(normalized)
+            icon: Global.misc.getIcon.brightness(normalized)
             value: bRoot.screen.value
             tooltipValue: normalized + "%"
             from: bRoot.screen.min
@@ -30,7 +38,7 @@ Lib.Card {
         Lib.Slider {
             readonly property int normalized: Math.round(100*value/bRoot.screen.max)
 
-            icon: global.misc.getIcon.brightness(normalized)
+            icon: Global.misc.getIcon.brightness(normalized)
             value: bRoot.screen.value
             tooltipValue: normalized + "%"
             from: bRoot.screen.min
@@ -43,7 +51,7 @@ Lib.Card {
         Lib.Slider {
             readonly property int normalized: Math.round(100*value/bRoot.keyboard.max)
 
-            icon: global.misc.getIcon.brightness(normalized)
+            icon: Global.misc.getIcon.brightness(normalized)
             value: bRoot.keyboard.value
             tooltipValue: normalized + "%"
             from: bRoot.keyboard.min

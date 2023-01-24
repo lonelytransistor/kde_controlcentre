@@ -9,7 +9,7 @@ Row {
     spacing: 0
 
     property string text: ""
-    property int pixelSize: global.mediumFontSize
+    property int pixelSize: Global.mediumFontSize
     property var weight: Font.Bold
 
     function split(str) {
@@ -48,8 +48,8 @@ Row {
             Layout.preferredHeight: height
             Layout.fillHeight: true
             Layout.fillWidth: true
-            height: text.height
-            width: text.width + icon.width
+            height: text||icon||alttext ? label.height : 0
+            width: text||icon||alttext ? label.width + icon.width : 0
             objectName: "LabelPart"
 
             property string text: repeater.model[model.index].text
@@ -57,7 +57,7 @@ Row {
             property string alttext: repeater.model[model.index].alttext
 
             PlasmaComponents.Label {
-                id: text
+                id: label
                 anchors.left: parent.left
 
                 font.pixelSize: labelRoot.pixelSize

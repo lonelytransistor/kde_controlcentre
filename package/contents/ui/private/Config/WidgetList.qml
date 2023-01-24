@@ -24,7 +24,7 @@ ListView {
         updateSplitterPos();
         save();
     }
-    Component.onCompleted: load()
+    onModelChanged: load()
     function updateSplitterPos() {
         for (let ix = 0; ix < model.count; ix++) {
             if (model.get(ix).uuid == listView.splitterMagic) {
@@ -95,7 +95,7 @@ ListView {
                 width: 1
                 color: item.isSplitter ? Qt.lighter(color, 1.2) : Qt.darker(color, 1.2)
             }
-            ComponentItem {
+            WidgetItem {
                 id: item
                 anchors.fill: parent
                 modelData: model
@@ -111,7 +111,7 @@ ListView {
                 }
                 Image {
                     anchors.centerIn: parent
-                    source: "../../assets/drag.svg"
+                    source: "../../../assets/drag.svg"
                     height: parent.height/2
                     width: parent.width
                 }
@@ -151,7 +151,7 @@ ListView {
                 width: 1
                 color: Qt.darker(color, 1.2)
             }
-            ComponentItem {
+            WidgetItem {
                 anchors.fill: parent
                 modelData: parent.source ? parent.source.modelData : undefined
             }

@@ -21,7 +21,7 @@ Canvas
 {
     Layout.fillWidth: true
     Layout.fillHeight: true
-    Layout.margins: global.smallSpacing
+    Layout.margins: Global.smallSpacing
 
     id: canvas
     antialiasing: true

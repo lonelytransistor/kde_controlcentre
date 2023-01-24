@@ -8,8 +8,16 @@ import org.kde.plasma.private.kicker 0.1 as Kicker
 import org.kde.kquickcontrolsaddons 2.0 as KQuickAddons
 
 import "../lib" as Lib
+import ".."
 
 Item {
+    property var widgetInfo: WidgetInfo {
+        title: "Session buttons"
+        description: "A widget containing basic session buttons."
+        icon: "system-shutdown"
+        uuid: "sessionbuttons"
+    }
+
     Rectangle {
         id: userImage
         KCoreAddons.KUser {
@@ -19,7 +27,7 @@ Item {
             top: parent.top
             bottom: parent.bottom
             left: parent.left
-            leftMargin: global.smallSpacing
+            leftMargin: Global.smallSpacing
         }
         width: height
         radius: width/2
@@ -57,5 +65,5 @@ Item {
     height: pHeight
     width: pWidth
     readonly property int pHeight: 40
-    readonly property int pWidth: global.fullRepWidth
+    readonly property int pWidth: Global.fullRepWidth
 }

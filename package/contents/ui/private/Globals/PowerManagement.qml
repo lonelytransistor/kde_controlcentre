@@ -2,6 +2,7 @@ import QtQuick 2.15
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.private.nightcolorcontrol 1.0 as Redshift
 
+import "../"
 import StatisticsProvider 1.0
 import SystemConfig 1.0
 
@@ -42,9 +43,11 @@ Item {
             return settingsVal ? settingsVal : 6500
         }
 
-        Component.onCompleted: currentTemperatureChanged()
         onCurrentTemperatureChanged: {
-            var _scheduledTransition = global.misc.dBus.get("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "scheduledTransitionDateTime");
+            if (!ini.t)
+                return;
+
+            var _scheduledTransition = Global.misc.dBus.get("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "scheduledTransitionDateTime");
             scheduledTransition = _scheduledTransition > 0 ? _scheduledTransition : 0;
             if (!inhibited && !previewing) {
                 systemActive = currentTemperature==nightTemperature;
@@ -62,12 +65,10 @@ Item {
                 return;
             }
             if (redshiftMonitor.systemActive && !inhibited) {
-                console.log("inhibiting")
                 redshiftInhibitor.inhibit();
             } else if (redshiftMonitor.previewing) {
                 redshiftMonitor.previewing = false;
-                global.misc.dBus.call("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "stopPreview", []);
-                console.log("!previewing")
+                Global.misc.dBus.call("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "stopPreview");
             }
         }
         readonly property var enable: function() {
@@ -78,7 +79,7 @@ Item {
                 redshiftInhibitor.uninhibit();
             } else if (!redshiftMonitor.previewing) {
                 redshiftMonitor.previewing = true;
-                global.misc.dBus.call("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "preview", [nightTemperature], "u");
+                Global.misc.dBus.call("org.kde.KWin", "/ColorCorrect", "org.kde.kwin.ColorCorrect", "preview", [nightTemperature], [Global.qMetaType.UInt]);
             }
         }
         readonly property var uninhibit: function() {
@@ -138,7 +139,7 @@ Item {
             readonly property double minutes: Math.floor(pmSource.remaining/60)
             readonly property double seconds: Math.floor(pmSource.remaining)
         }
-        readonly property string icon: global.misc.getIcon.battery(pmSource.now, pmSource.isCharging)
+        readonly property string icon: ini.t ? Global.misc.getIcon.battery(pmSource.now, pmSource.isCharging) : ""
         readonly property string status: pmSource.status
         readonly property string timeStatus: pmSource.status2
         readonly property var history: Item {
@@ -249,6 +250,27 @@ Item {
             }
         }
     }
+    readonly property var powerProfile: Item {
+        Item {
+            id: powerProfileInternal
+            property string active: ""
+            property int activeIndex: 0
+            property bool inited: ini.t
+            onInitedChanged: update()
+            signal update
+            onUpdate: {
+                active = Global.misc.dBus.get("net.hadess.PowerProfiles", "/net/hadess/PowerProfiles", "net.hadess.PowerProfiles", "ActiveProfile", true);
+                activeIndex = parent.profiles.indexOf(active);
+            }
+        }
+        readonly property var set: function(n) {
+            Global.misc.dBus.set("net.hadess.PowerProfiles", "/net/hadess/PowerProfiles", "net.hadess.PowerProfiles", "ActiveProfile", profiles[Math.clamp(n, 0, profiles.length-1)], 0, true);
+            powerProfileInternal.update();
+        }
+        readonly property var profiles: ["power-saver", "balanced", "performance"]
+        readonly property string active: powerProfileInternal.active
+        readonly property int activeIndex: powerProfileInternal.activeIndex
+    }
 
     PlasmaCore.DataSource {
         id: pmSource
@@ -296,7 +318,7 @@ Item {
                     remaining = Math.abs(data["Battery"]["Remaining msec"]<<0>>0)/1000
                     isCharging = data["Battery"]["State"] != "Discharging"
 
-                    status2 = (isCharging ? "Time to full: " : "Time left: ") + global.misc.time.printf(remaining*1000, "%h:%M")
+                    status2 = (isCharging ? "Time to full: " : "Time left: ") + (ini.t ? Global.misc.time.printf(remaining*1000, "%h:%M") : "");
                     status  =  isCharging ? "Charging" : "Discharging"
                     now = data["Battery"]["Percent"]
                     rate = Math.round(3600.0*now/remaining);
